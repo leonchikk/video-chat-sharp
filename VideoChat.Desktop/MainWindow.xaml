@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VideoChat.Desktop"
         mc:Ignorable="d"
+        Closed="Window_Closed"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <Button x:Name="SendButton" Content="Send" Margin="106,45,487,342" Click="SendButton_Click"/>
+        <Image x:Name="VideoField" Margin="243,135,301,84" />
+        <Label x:Name="Label" HorizontalAlignment="Left" Margin="57,201,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
 using System.Text;
+using VideoChat.API.Sockets;
 
 namespace VideoChat.API
 {
@@ -13,6 +14,8 @@ namespace VideoChat.API
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<ConnectionManager>();
+            services.AddSingleton<SocketHandler>();
             services.AddMvc(options => options.EnableEndpointRouting = false);
 
             services.AddAuthentication(options =>
@@ -46,19 +49,7 @@ namespace VideoChat.API
             app.UseAuthentication();
             app.UseMvc();
             app.UseWebSockets();
-
-            app.Use(async (httpContext, next) =>
-            {
-                if (httpContext.WebSockets.IsWebSocketRequest)
-                {
-                    using (WebSocket webSocket = await httpContext.WebSockets.AcceptWebSocketAsync())
-                    {
-                        //httpContext.User.
-                    }
-                }
-
-                await next();
-            });
+            app.UseMiddleware<SocketMiddleware>();
         }
     }
 }
