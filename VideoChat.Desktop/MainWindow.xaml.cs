@@ -55,9 +55,6 @@ namespace VideoChat.Desktop
                 //_clientSocket.Options.SetRequestHeader("Authorization", jwtToken);
                 //_clientSocket.ConnectAsync(new Uri("ws://192.168.0.107:5000"), CancellationToken.None);
 
-
-                //var encoder = new ("openh264-2.1.1-win32.dll");
-
                 OnMessageReceive += (packet) =>
                 {
                     Dispatcher.BeginInvoke(new Action(() =>
