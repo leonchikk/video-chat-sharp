@@ -178,7 +178,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packet.cs" />
     <Compile Include="PacketBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -205,6 +204,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Multimedia.Audio.Desktop\Multimedia.Audio.Desktop.csproj">
+      <Project>{cb69c981-308d-4e4c-b0c4-3ba3d6d0a330}</Project>
+      <Name>Multimedia.Audio.Desktop</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Multimedia.Video.Desktop\Multimedia.Video.Desktop.csproj">
+      <Project>{451E8F76-3709-4F59-929C-3AF88AF64F50}</Project>
+      <Name>Multimedia.Video.Desktop</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VideoChat.Core\VideoChat.Core.csproj">
+      <Project>{c0033c08-9619-4846-9038-ada945119daf}</Project>
+      <Name>VideoChat.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\OpenH264.NET.1.0.4\build\OpenH264.NET.targets" Condition="Exists('..\packages\OpenH264.NET.1.0.4\build\OpenH264.NET.targets')" />

@@ -50,7 +50,6 @@ namespace OpenH264Lib {
 		memcpy(i420_buffer, i420, buffer_size);
 
 		// insert key frame at periodic interval.
-		// 一定間隔でキーフレーム(Iフレーム)を挿入
 		if (num_of_frames++ % keyframe_interval == 0) {
 			encoder->ForceIntraFrame(true);
 		}
