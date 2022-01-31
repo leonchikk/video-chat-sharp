@@ -114,10 +114,10 @@ namespace Multimedia.Video.Desktop
         {
             _codec.OnFramesEncode += OnCodecEncodeFrames;
             _codec.Setup(
-               _captureDevice.VideoResolution.FrameSize.Width,
-               _captureDevice.VideoResolution.FrameSize.Height,
-                bitrate: 500,
-                fps: _captureDevice.VideoResolution.AverageFrameRate
+               size.Width,
+               size.Height,
+                bitrate,
+                fps
               );
         }
     }

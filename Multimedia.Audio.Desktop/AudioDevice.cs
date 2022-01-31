@@ -16,7 +16,6 @@ namespace Multimedia.Audio.Desktop
 
         private WaveIn _audioRecorder;
         private BufferedWaveProvider _bufferedWaveProvider;
-        private SavingWaveProvider _savingWaveProvider;
         private WaveOut _audioPlayer;
         private MemoryStream _audioMemoryStream;
         private bool _disposed = false;
@@ -66,6 +65,12 @@ namespace Multimedia.Audio.Desktop
                 throw new ApplicationException("Audio has not been setuped yet");
             }
 
+            if (_audioPlayer.PlaybackState == PlaybackState.Playing)
+            {
+                _audioRecorder?.StopRecording();
+                return;
+            }
+
             _audioRecorder.StartRecording();
             _audioPlayer.Play();
         }
@@ -98,12 +103,10 @@ namespace Multimedia.Audio.Desktop
             _audioRecorder.WaveFormat = new WaveFormat(16000, 1);
             _audioRecorder.DeviceNumber = inputDeviceCapability.DeviceNumber;
 
-            _bufferedWaveProvider = new BufferedWaveProvider(_audioRecorder.WaveFormat);
-            _savingWaveProvider = new SavingWaveProvider(_bufferedWaveProvider, _audioMemoryStream);
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
 
             _audioPlayer = new WaveOut();
-            _audioPlayer.DeviceNumber = outputDeviceCapability.DeviceNumber;
-            _audioPlayer.Init(_savingWaveProvider);
+            _audioPlayer.Init(_bufferedWaveProvider);
         }
 
         public void Dispose()

@@ -3,11 +3,13 @@ using Multimedia.Audio.Desktop;
 using Multimedia.Video.Desktop;
 using Multimedia.Video.Desktop.Codecs;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
@@ -25,8 +27,8 @@ namespace VideoChat.Desktop
 {
     public partial class MainWindow : Window
     {
-        private object syncObj = new object();
         private readonly ClientWebSocket _clientSocket;
+        private readonly ConcurrentQueue<Packet> _concurrentQueue;
 
         public IVideoDeviceManager VideoDeviceManager;
         public IAudioDeviceManager AudioDeviceManager;
@@ -35,6 +37,8 @@ namespace VideoChat.Desktop
 
         public MainWindow()
         {
+            _concurrentQueue = new ConcurrentQueue<Packet>();
+
             using (var httpClient = new HttpClient())
             {
                 var response = httpClient.PostAsync("http://192.168.0.107:5000/api/auth", null)
@@ -57,7 +61,8 @@ namespace VideoChat.Desktop
                 OnDataReceive += DataRecive;
 
                 //REFACTOR ME
-                _ = Receive();
+                Task.Run(Receive);
+                Task.Run(ProccesQueue);
 
                 //clientSocket.
 
@@ -75,7 +80,7 @@ namespace VideoChat.Desktop
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2]; // 1016 is one chunck
+                    byte[] tempStorage = new byte[2048]; // 1016 is one chunck
                     var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
 
                     receivedBytes.AddRange(tempStorage);
@@ -97,7 +102,7 @@ namespace VideoChat.Desktop
 
                             var packet = new Packet()
                             {
-                                PayloadStream = new MemoryStream(payload),
+                                PayloadBuffer = payload,
                                 Type = packetTypeEnum
                             };
 
@@ -117,8 +122,8 @@ namespace VideoChat.Desktop
             VideoDeviceManager = new VideoDevice(new H264Codec());
             //TODO: Add logic if there no device use just audio
             VideoDeviceManager.SetupDevice(VideoDeviceManager.AvailableDevices[0]);
-            VideoDeviceManager.SetupCodec(VideoDeviceManager.DeviceCapabilities[0].FrameSize,
-                500, VideoDeviceManager.DeviceCapabilities[0].FrameRate);
+            VideoDeviceManager.SetupCodec(VideoDeviceManager.DeviceCapabilities[1].FrameSize,
+                400, VideoDeviceManager.DeviceCapabilities[1].FrameRate);
             VideoDeviceManager.OnCaptureNewFrames += CaptureNewFrame;
 
             AudioDeviceManager = new AudioDevice();
@@ -127,123 +132,62 @@ namespace VideoChat.Desktop
                 AudioDeviceManager.InputDeviceCapabilities.First(),
                 AudioDeviceManager.OutputDeviceCapabilities.First()
             );
+
+            VideoDeviceManager.Start(VideoDeviceManager.DeviceCapabilities[1]);
+            AudioDeviceManager.Start();
+        }
+
+        private async Task ProccesQueue()
+        {
+            while(true)
+            {
+                _concurrentQueue.TryDequeue(out var packet);
+
+                if (packet == null)
+                    continue;
+
+                using (var stream = new MemoryStream())
+                {
+                    using (var binaryWriter = new BinaryWriter(stream))
+                    {
+                        var buffer = packet.PayloadBuffer.ToArray();
+
+                        binaryWriter.Write((byte)packet.Type);
+                        binaryWriter.Write(buffer.Length);
+                        binaryWriter.Write(buffer);
+
+                        _clientSocket.SendAsync(
+                                new ArraySegment<byte>(stream.ToArray()),
+                                WebSocketMessageType.Binary,
+                                true,
+                                CancellationToken.None)
+                                    .ConfigureAwait(false)
+                                    .GetAwaiter()
+                                    .GetResult();
+
+                    }
+                }
+
+                await Task.Delay(40);
+            }
         }
 
         private void CaptureNewFrame(byte[] buffer)
         {
-            using (var stream = new MemoryStream())
-            {
-                using (var binaryWriter = new BinaryWriter(stream))
-                {
-                    binaryWriter.Write((byte)PacketTypeEnum.Video);
-                    binaryWriter.Write(buffer.Length);
-                    binaryWriter.Write(buffer);
-
-                    lock(syncObj)
-                        _clientSocket.SendAsync(
-                              new ArraySegment<byte>(stream.ToArray()),
-                              WebSocketMessageType.Binary,
-                              true,
-                              CancellationToken.None)
-                                   .ConfigureAwait(false)
-                                   .GetAwaiter()
-                                   .GetResult();
-                }
-            }
+            //_concurrentQueue.Enqueue(new Packet()
+            //{
+            //    Type = PacketTypeEnum.Video,
+            //    PayloadBuffer = buffer
+            //});
         }
 
         private void SampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            using (var stream = new MemoryStream())
+            _concurrentQueue.Enqueue(new Packet()
             {
-                using (var binaryWriter = new BinaryWriter(stream))
-                {
-                    binaryWriter.Write((byte)PacketTypeEnum.Audio);
-                    binaryWriter.Write(e.Buffer.Length);
-                    binaryWriter.Write(e.Buffer);
-
-                    lock(syncObj)
-                        _clientSocket.SendAsync(
-                              new ArraySegment<byte>(stream.ToArray()),
-                              WebSocketMessageType.Binary,
-                              true,
-                              CancellationToken.None)
-                                   .ConfigureAwait(false)
-                                   .GetAwaiter()
-                                   .GetResult();
-                }
-            }
-        }
-
-        //private void CaptureNewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
-        //{
-        //    //if (!client.IsAlive)
-        //    //    client.Connect();
-
-        //    GC.Collect();
-        //    var frame = eventArgs.Frame;
-
-
-        //    ////Dispatcher.BeginInvoke(new Action(() =>
-        //    ////{
-        //    ////    VideoField.Source = ToBitmapImage(frame);
-        //    ////}));d
-
-        //    ////Dispatcher.CurrentDispatcher.Invoke(() =>
-        //    ////{
-
-        //    string message = "It's whatever VSProtocol message!";
-
-        //    System.Drawing.Image img = (Bitmap)eventArgs.Frame.Clone();
-
-        //    MemoryStream ms = new MemoryStream();
-        //    img.Save(ms, ImageFormat.Jpeg);
-        //    ms.Seek(0, SeekOrigin.Begin);
-        //    BitmapImage bi = new BitmapImage();
-        //    bi.BeginInit();
-        //    bi.StreamSource = ms;
-        //    bi.EndInit();
-        //    bi.Freeze();
-
-        //    var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\test.jpg";
-        //    img.Save(path, ImageFormat.Jpeg);
-
-        //    var packet = PacketBuilder.MakePacket(message, bi);
-        //    var comp = packet.Compress();
-
-        //    Dispatcher.BeginInvoke(new Action(() =>
-        //        {
-        //            Label.Content = $"Sending video.";
-        //        }));
-
-        //    _clientSocket.SendAsync(
-        //              new ArraySegment<byte>(packet),
-        //              WebSocketMessageType.Binary,
-        //              true,
-        //              CancellationToken.None)
-        //       .ConfigureAwait(false)
-        //       .GetAwaiter()
-        //       .GetResult();
-        //}
-
-        private void SendButton_Click(object sender, RoutedEventArgs e)
-        {
-            VideoDeviceManager.Start(VideoDeviceManager.DeviceCapabilities[1]);
-            AudioDeviceManager.Start();
-
-            Label.Content = "Start video sending";
-        }
-
-        private Packet ParseByteArray(byte[] buffer)
-        {
-            if (buffer.Length == 0)
-                return null;
-
-
-            return new Packet
-            {
-                //Frame = buffer
-            };
+                Type = PacketTypeEnum.Audio,
+                PayloadBuffer = e.Buffer
+            });
         }
 
         private void DataRecive(Packet packet)
@@ -251,7 +195,9 @@ namespace VideoChat.Desktop
             switch (packet.Type)
             {
                 case PacketTypeEnum.Video:
-                    foreach (var decodedImage in VideoDeviceManager.Decode(packet.PayloadStream.ToArray()))
+
+                    if (VideoDeviceManager?.Decode(packet.PayloadBuffer).Any() == true)
+                    foreach (var decodedImage in VideoDeviceManager?.Decode(packet.PayloadBuffer))
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -260,8 +206,9 @@ namespace VideoChat.Desktop
                     }
                     break;
                 case PacketTypeEnum.Audio:
-                    var buffer = packet.PayloadStream.ToArray();
-                    AudioDeviceManager.PlaySamples(buffer, 60);
+                    var buffer = packet.PayloadBuffer;
+                    AudioDeviceManager?.PlaySamples(buffer, 60);
+                   
                     break;
                 default:
                     break;
@@ -270,41 +217,43 @@ namespace VideoChat.Desktop
             //packet.PayloadStream.Dispose();
         }
 
-        public static BitmapImage ByteArrayToImage(Byte[] imageData)
-        {
-            using (var ms = new System.IO.MemoryStream(imageData))
-            {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad; // here
-                image.StreamSource = ms;
-                image.EndInit();
-
-                return image;
-            }
-        }
-
         public static BitmapImage ToBitmapImage(Bitmap bitmap)
         {
-            var memory = new MemoryStream();
+            using (var memory = new MemoryStream())
+            {
 
-            bitmap.Save(memory, ImageFormat.Jpeg);
-            memory.Position = 0;
+                bitmap.Save(memory, ImageFormat.Jpeg);
+                memory.Position = 0;
 
-            var bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.StreamSource = memory;
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapImage.EndInit();
-            bitmapImage.Freeze();
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
 
-            return bitmapImage;
+                return bitmapImage;
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
             _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
             VideoDeviceManager.Stop();
+        }
+
+        private void MicroOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            AudioDeviceManager.Setup(
+               AudioDeviceManager.InputDeviceCapabilities.First(),
+               AudioDeviceManager.OutputDeviceCapabilities.First()
+           );
+           AudioDeviceManager.Start();
+        }
+
+        private void MicroOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            AudioDeviceManager.Stop();
         }
     }
 }

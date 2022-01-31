@@ -8,8 +8,9 @@
         Closed="Window_Closed"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button x:Name="SendButton" Content="Send" Margin="106,45,487,342" Click="SendButton_Click"/>
         <Image x:Name="VideoField" Margin="243,135,301,84" />
         <Label x:Name="Label" HorizontalAlignment="Left" Margin="57,201,0,0" VerticalAlignment="Top"/>
+        <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" HorizontalAlignment="Left" Margin="116,54,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="243,54,0,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>

@@ -15,7 +15,7 @@ namespace Multimedia.Video.Desktop.Codecs
     public class H264Codec : IVideoCodec
     {
         private const string _dllName = "openh264-2.1.1-win32.dll";
-        private const int _requiredFramesAmountToEncode = 2;
+        private const int _requiredFramesAmountToEncode = 3;
 
         private readonly Encoder _encoder;
         private readonly Decoder _decoder;
@@ -97,7 +97,7 @@ namespace Multimedia.Video.Desktop.Codecs
 
                 foreach (var chunk in chunks)
                 {
-                    Thread.Sleep(1000 / _fps);
+                    //Thread.Sleep(1000 / _fps);
 
                     var frame = chunk.ReadToEnd();
                     var image = decoder.Decode(frame, frame.Length);
