@@ -1,5 +1,4 @@
-﻿
-using Multimedia.Audio.Desktop;
+﻿using Multimedia.Audio.Desktop;
 using Multimedia.Video.Desktop;
 using Multimedia.Video.Desktop.Codecs;
 using System;
@@ -9,18 +8,17 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Media;
 using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
+using VideoChat.Core.Multimedia.Codecs;
 using VideoChat.Core.Packets;
 
 namespace VideoChat.Desktop
@@ -30,8 +28,10 @@ namespace VideoChat.Desktop
         private readonly ClientWebSocket _clientSocket;
         private readonly ConcurrentQueue<Packet> _concurrentQueue;
 
-        public IVideoDeviceManager VideoDeviceManager;
-        public IAudioDeviceManager AudioDeviceManager;
+        public IVideoDevice VideoDevice;
+        public IVideoCodec VideoCodec;
+        public IInputAudioDevice InputAudioDevice;
+        public IOutputAudioDevice OutputAudioDevice;
 
         public event Action<Packet> OnDataReceive;
 
@@ -119,27 +119,48 @@ namespace VideoChat.Desktop
 
         public void ConfigWebCams()
         {
-            VideoDeviceManager = new VideoDevice(new H264Codec());
-            //TODO: Add logic if there no device use just audio
-            VideoDeviceManager.SetupDevice(VideoDeviceManager.AvailableDevices[0]);
-            VideoDeviceManager.SetupCodec(VideoDeviceManager.DeviceCapabilities[1].FrameSize,
-                400, VideoDeviceManager.DeviceCapabilities[1].FrameRate);
-            VideoDeviceManager.OnCaptureNewFrames += CaptureNewFrame;
+            //TODO: Refactor desing (particular error handling and video codec setuping)
+            VideoDevice = new VideoDevice();
 
-            AudioDeviceManager = new AudioDevice();
-            AudioDeviceManager.OnSampleRecorded += SampleRecorded;
-            AudioDeviceManager.Setup(
-                AudioDeviceManager.InputDeviceCapabilities.First(),
-                AudioDeviceManager.OutputDeviceCapabilities.First()
-            );
+            VideoCodec = new H264Codec();
+            VideoCodec.Setup(
+                VideoDevice.CurrentDeviceCapability.FrameSize.Width,
+                VideoDevice.CurrentDeviceCapability.FrameSize.Height);
 
-            VideoDeviceManager.Start(VideoDeviceManager.DeviceCapabilities[1]);
-            AudioDeviceManager.Start();
+            InputAudioDevice = new InputAudioDevice();
+            OutputAudioDevice = new OutputAudioDevice();
+
+            VideoDevice.OnFrame += VideoDevice_OnFrame;
+            VideoCodec.OnEncode += VideoCodec_OnEncode;
+            InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
+        }
+
+        private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
+        {
+            _concurrentQueue.Enqueue(new Packet()
+            {
+                Type = PacketTypeEnum.Audio,
+                PayloadBuffer = e.Buffer
+            });
+        }
+
+        private void VideoCodec_OnEncode(byte[] buffer)
+        {
+            _concurrentQueue.Enqueue(new Packet()
+            {
+                Type = PacketTypeEnum.Video,
+                PayloadBuffer = buffer
+            });
+        }
+
+        private void VideoDevice_OnFrame(Bitmap bitmap)
+        {
+            VideoCodec?.Encode(bitmap);
         }
 
         private async Task ProccesQueue()
         {
-            while(true)
+            while (true)
             {
                 _concurrentQueue.TryDequeue(out var packet);
 
@@ -168,26 +189,8 @@ namespace VideoChat.Desktop
                     }
                 }
 
-                await Task.Delay(40);
+                await Task.Delay(10);
             }
-        }
-
-        private void CaptureNewFrame(byte[] buffer)
-        {
-            //_concurrentQueue.Enqueue(new Packet()
-            //{
-            //    Type = PacketTypeEnum.Video,
-            //    PayloadBuffer = buffer
-            //});
-        }
-
-        private void SampleRecorded(AudioSampleRecordedEventArgs e)
-        {
-            _concurrentQueue.Enqueue(new Packet()
-            {
-                Type = PacketTypeEnum.Audio,
-                PayloadBuffer = e.Buffer
-            });
         }
 
         private void DataRecive(Packet packet)
@@ -195,9 +198,7 @@ namespace VideoChat.Desktop
             switch (packet.Type)
             {
                 case PacketTypeEnum.Video:
-
-                    if (VideoDeviceManager?.Decode(packet.PayloadBuffer).Any() == true)
-                    foreach (var decodedImage in VideoDeviceManager?.Decode(packet.PayloadBuffer))
+                    foreach (var decodedImage in VideoCodec?.Decode(packet.PayloadBuffer))
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -207,8 +208,8 @@ namespace VideoChat.Desktop
                     break;
                 case PacketTypeEnum.Audio:
                     var buffer = packet.PayloadBuffer;
-                    AudioDeviceManager?.PlaySamples(buffer, 60);
-                   
+                    OutputAudioDevice?.PlaySamples(buffer, 60);
+
                     break;
                 default:
                     break;
@@ -239,21 +240,18 @@ namespace VideoChat.Desktop
         private void Window_Closed(object sender, EventArgs e)
         {
             _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-            VideoDeviceManager.Stop();
+            VideoDevice.Stop();
+            InputAudioDevice.Stop();
+            OutputAudioDevice.Stop();
         }
 
         private void MicroOnButton_Click(object sender, RoutedEventArgs e)
         {
-            AudioDeviceManager.Setup(
-               AudioDeviceManager.InputDeviceCapabilities.First(),
-               AudioDeviceManager.OutputDeviceCapabilities.First()
-           );
-           AudioDeviceManager.Start();
-        }
+            InputAudioDevice.Start();        }
 
         private void MicroOffButton_Click(object sender, RoutedEventArgs e)
         {
-            AudioDeviceManager.Stop();
+            InputAudioDevice.Stop();
         }
     }
 }

@@ -50,8 +50,9 @@
     <Compile Include="Models\EventArgs\NewFrameEventArgs.cs" />
     <Compile Include="Models\VideoDeviceInfo.cs" />
     <Compile Include="Multimedia\Codecs\IVideoCodec.cs" />
-    <Compile Include="Multimedia\IAudioDeviceManager.cs" />
-    <Compile Include="Multimedia\IVideoDeviceManager.cs" />
+    <Compile Include="Multimedia\IInputAudioDevice.cs" />
+    <Compile Include="Multimedia\IOutputAudioDevice.cs" />
+    <Compile Include="Multimedia\IVideoDevice.cs" />
     <Compile Include="Networking\IHttpClientWrapper.cs" />
     <Compile Include="Networking\IWebSocketClient.cs" />
     <Compile Include="Packets\Packet.cs" />

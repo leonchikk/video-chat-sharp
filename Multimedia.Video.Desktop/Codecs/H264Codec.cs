@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia.Codecs;
 using static OpenH264Lib.Encoder;
 
@@ -34,6 +35,7 @@ namespace Multimedia.Video.Desktop.Codecs
         public bool IsSetuped => _isSetuped;
 
         public event Action<byte[]> OnFramesEncode;
+        public event Action<byte[]> OnEncode;
 
         public H264Codec()
         {
@@ -83,6 +85,16 @@ namespace Multimedia.Video.Desktop.Codecs
             _encoder.Setup(width, height, 1000 * bitrate, _fps, 0.1f, _onEncode, _onEncodeFinish); // 0.02f - 60 fps, 0.04, 00.8 - 30fps
 
             _isSetuped = true;
+        }
+
+        public void Setup(VideoDeviceCapability capability)
+        {
+            if (capability == null)
+            {
+                throw new ArgumentNullException(nameof(capability));
+            }
+
+            Setup(capability.FrameSize.Width, capability.FrameSize.Height, 1000, capability.FrameRate);
         }
 
         public IEnumerable<Bitmap> Decode(byte[] stream)

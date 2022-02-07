@@ -45,8 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioDevice.cs" />
-    <Compile Include="CustomProviders\SavingWaveProvider.cs" />
+    <Compile Include="InputAudioDevice.cs" />
+    <Compile Include="OutputAudioDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
