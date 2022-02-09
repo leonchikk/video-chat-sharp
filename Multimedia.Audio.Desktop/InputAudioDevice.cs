@@ -45,8 +45,9 @@ namespace Multimedia.Audio.Desktop
 
             _audioRecorder = new WaveIn();
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
-            _audioRecorder.WaveFormat = new WaveFormat(16000, 1);
+            _audioRecorder.WaveFormat = new WaveFormat(48000, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
+            _audioRecorder.BufferMilliseconds = 1000 / 30;
 
             _isSetuped = true;
         }
@@ -68,7 +69,7 @@ namespace Multimedia.Audio.Desktop
 
         public void Stop()
         {
-            _audioRecorder.StartRecording();
+            _audioRecorder.StopRecording();
         }
 
         public void Dispose()

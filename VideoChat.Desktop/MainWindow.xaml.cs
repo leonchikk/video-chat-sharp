@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
@@ -109,6 +110,8 @@ namespace VideoChat.Desktop
                             OnDataReceive?.Invoke(packet);
                         }
                     }
+
+                    //await Task.Delay(10);
                 }
                 catch (Exception ex)
                 {
@@ -119,20 +122,20 @@ namespace VideoChat.Desktop
 
         public void ConfigWebCams()
         {
-            //TODO: Refactor desing (particular error handling and video codec setuping)
-            VideoDevice = new VideoDevice();
-
-            VideoCodec = new H264Codec();
-            VideoCodec.Setup(
-                VideoDevice.CurrentDeviceCapability.FrameSize.Width,
-                VideoDevice.CurrentDeviceCapability.FrameSize.Height);
-
             InputAudioDevice = new InputAudioDevice();
             OutputAudioDevice = new OutputAudioDevice();
+            VideoDevice = new VideoDevice();
+            VideoCodec = new H264Codec();
+
+            if (VideoDevice.CurrentDeviceCapability != null)
+            {
+                VideoCodec.Setup(VideoDevice.CurrentDeviceCapability);
+            }
 
             VideoDevice.OnFrame += VideoDevice_OnFrame;
             VideoCodec.OnEncode += VideoCodec_OnEncode;
             InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
+            OutputAudioDevice.Start();
         }
 
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
@@ -247,11 +250,22 @@ namespace VideoChat.Desktop
 
         private void MicroOnButton_Click(object sender, RoutedEventArgs e)
         {
-            InputAudioDevice.Start();        }
+            InputAudioDevice.Start();        
+        }
 
         private void MicroOffButton_Click(object sender, RoutedEventArgs e)
         {
             InputAudioDevice.Stop();
+        }
+
+        private void CameraOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            VideoDevice.Start();
+        }
+
+        private void CameraOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            VideoDevice.Stop();
         }
     }
 }

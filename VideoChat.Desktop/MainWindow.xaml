@@ -12,5 +12,7 @@
         <Label x:Name="Label" HorizontalAlignment="Left" Margin="57,201,0,0" VerticalAlignment="Top"/>
         <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" HorizontalAlignment="Left" Margin="116,54,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="243,54,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="CameraOnButton_Click" x:Name="CameraOnButton" Content="Camera On" HorizontalAlignment="Left" Margin="116,20,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="CameraOffButton_Click"  x:Name="CameraOffButton" Content="Camera Off" HorizontalAlignment="Left" Margin="243,20,0,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>

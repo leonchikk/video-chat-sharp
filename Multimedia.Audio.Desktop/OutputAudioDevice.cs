@@ -55,7 +55,7 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 1));
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider); 

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia.Codecs;
 using static OpenH264Lib.Encoder;
@@ -16,7 +15,7 @@ namespace Multimedia.Video.Desktop.Codecs
     public class H264Codec : IVideoCodec
     {
         private const string _dllName = "openh264-2.1.1-win32.dll";
-        private const int _requiredFramesAmountToEncode = 3;
+        private const int _requiredFramesAmountToDencode = 1;
 
         private readonly Encoder _encoder;
         private readonly Decoder _decoder;
@@ -30,11 +29,10 @@ namespace Multimedia.Video.Desktop.Codecs
         private bool _disposed = false;
         private bool _isSetuped = false;
 
-        public int EncodeVideoLatency => _requiredFramesAmountToEncode * (1000 / _fps);
+        public int EncodeVideoLatency => _requiredFramesAmountToDencode * (1000 / _fps);
 
         public bool IsSetuped => _isSetuped;
 
-        public event Action<byte[]> OnFramesEncode;
         public event Action<byte[]> OnEncode;
 
         public H264Codec()
@@ -51,11 +49,11 @@ namespace Multimedia.Video.Desktop.Codecs
 
             _onEncodeFinish = () =>
             {
-                if (_capturedFramesCount <= _requiredFramesAmountToEncode)
+                if (_capturedFramesCount <= _requiredFramesAmountToDencode)
                     return;
 
                 _capturedFramesCount = 0;
-                _videoStream.Seek(0, SeekOrigin.Begin);
+                 _videoStream.Seek(0, SeekOrigin.Begin);
 
                 using (var outputStream = new MemoryStream())
                 {
@@ -72,7 +70,7 @@ namespace Multimedia.Video.Desktop.Codecs
                     outputStream.Position = 0;
                     outputStream.Seek(0, SeekOrigin.Begin);
 
-                    OnFramesEncode?.Invoke(outputStream.ToArray());
+                    OnEncode?.Invoke(outputStream.ToArray());
                 };
             };
         }
@@ -82,7 +80,8 @@ namespace Multimedia.Video.Desktop.Codecs
             _fps = fps;
 
             _aviWriter = new AviWriter(_videoStream, "H264", width, height, _fps); //TODO: Consider some way to put here configuration
-            _encoder.Setup(width, height, 1000 * bitrate, _fps, 0.1f, _onEncode, _onEncodeFinish); // 0.02f - 60 fps, 0.04, 00.8 - 30fps
+            //FRAME RATE INTERVAL AND FPS ARE INDEPENDENT FROM DEVICE FRAME RATE
+            _encoder.Setup(width, height, bitrate, _fps, 0.02f, _onEncode, _onEncodeFinish); // 0.02f - 60 fps, 0.04, 00.8 - 30fps
 
             _isSetuped = true;
         }
@@ -94,7 +93,7 @@ namespace Multimedia.Video.Desktop.Codecs
                 throw new ArgumentNullException(nameof(capability));
             }
 
-            Setup(capability.FrameSize.Width, capability.FrameSize.Height, 1000, capability.FrameRate);
+            Setup(capability.FrameSize.Width, capability.FrameSize.Height, 1000 * 1000, 60);
         }
 
         public IEnumerable<Bitmap> Decode(byte[] stream)
@@ -122,6 +121,11 @@ namespace Multimedia.Video.Desktop.Codecs
 
         public void Encode(Bitmap bitmap)
         {
+            if (!IsSetuped)
+            {
+                throw new Exception("Encoder is not setuped");
+            }
+
             _capturedFramesCount++;
             _encoder?.Encode(bitmap);
         }
