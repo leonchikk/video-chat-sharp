@@ -47,7 +47,7 @@ namespace Multimedia.Video.Desktop
 
             if (capability == null)
             {
-                throw new ArgumentNullException(nameof(capability));
+                return;
             }
 
             _captureDevice.VideoResolution = _captureDevice.VideoCapabilities[capability.DeviceNumber];
@@ -140,7 +140,7 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            var capability = DeviceCapabilities.ToList()[1];
+            var capability = DeviceCapabilities.First();
             SetCapability(capability);
         }
     }
