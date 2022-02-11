@@ -134,10 +134,19 @@ namespace VideoChat.Desktop
                 VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
             }
 
+            VideoDecoder.OnDecode += VideoDecoder_OnDecode;
             VideoDevice.OnFrame += VideoDevice_OnFrame;
             VideoEncoder.OnEncode += VideoCodec_OnEncode;
             InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
             OutputAudioDevice.Start();
+        }
+
+        private void VideoDecoder_OnDecode(Bitmap decodedImage)
+        {
+            //Dispatcher.BeginInvoke(new Action(() =>
+            //{
+                VideoField.Source = ToBitmapImage(decodedImage);
+            //}));
         }
 
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
@@ -204,12 +213,9 @@ namespace VideoChat.Desktop
             {
                 case PacketTypeEnum.Video:
 
-                    VideoDecoder.Decode(packet.PayloadBuffer, new Action<Bitmap>((decodedImage) =>
-                    {
-                        VideoField.Source = ToBitmapImage(decodedImage);
-                    }));
-
+                    VideoDecoder?.Decode(packet.PayloadBuffer);
                     break;
+
                 case PacketTypeEnum.Audio:
                     var buffer = packet.PayloadBuffer;
                     OutputAudioDevice?.PlaySamples(buffer, 60);

@@ -5,6 +5,8 @@ namespace VideoChat.Core.Multimedia.Codecs
 {
     public interface IVideoDecoder
     {
-        void Decode(byte[] stream, Action<Bitmap> displayBitmapAction);
+        event Action<Bitmap> OnDecode;
+
+        void Decode(byte[] stream);
     }
 }
