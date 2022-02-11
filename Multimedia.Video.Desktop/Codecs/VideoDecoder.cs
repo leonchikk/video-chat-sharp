@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using VideoChat.Core.Multimedia.Codecs;
 
 namespace Multimedia.Video.Desktop.Codecs
@@ -16,24 +17,27 @@ namespace Multimedia.Video.Desktop.Codecs
 
         public void Decode(byte[] buffer)
         {
-            using (var stream = new MemoryStream(buffer))
+            Task.Run(() =>
             {
-                using (var decoder = new Decoder(_dllName))
+                using (var stream = new MemoryStream(buffer))
                 {
-                    var riff = new RiffFile(stream);
-
-                    var frames = riff.Chunks.OfType<RiffChunk>().Where(x => x.FourCC == "00dc");
-
-                    foreach (var chunk in frames)
+                    using (var decoder = new Decoder(_dllName))
                     {
-                        var frame = chunk.ReadToEnd();
-                        var decodedImage = decoder.Decode(frame, frame.Length);
-                        if (decodedImage == null) continue;
+                        var riff = new RiffFile(stream);
 
-                        OnDecode?.Invoke(decodedImage);
+                        var frames = riff.Chunks.OfType<RiffChunk>().Where(x => x.FourCC == "00dc");
+
+                        foreach (var chunk in frames)
+                        {
+                            var frame = chunk.ReadToEnd();
+                            var decodedImage = decoder.Decode(frame, frame.Length);
+                            if (decodedImage == null) continue;
+
+                            OnDecode?.Invoke(decodedImage);
+                        }
                     }
                 }
-            }
+            });
         }
     }
 }

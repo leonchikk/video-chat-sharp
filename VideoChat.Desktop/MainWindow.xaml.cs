@@ -21,6 +21,7 @@ using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 using VideoChat.Core.Multimedia.Codecs;
 using VideoChat.Core.Packets;
+using VideoChat.Desktop.ViewModels;
 
 namespace VideoChat.Desktop
 {
@@ -134,6 +135,8 @@ namespace VideoChat.Desktop
                 VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
             }
 
+            VideoDevicesList.DataContext = new VideoDeviceViewModel(VideoDevice.AvailableDevices);
+
             VideoDecoder.OnDecode += VideoDecoder_OnDecode;
             VideoDevice.OnFrame += VideoDevice_OnFrame;
             VideoEncoder.OnEncode += VideoCodec_OnEncode;
@@ -143,10 +146,10 @@ namespace VideoChat.Desktop
 
         private void VideoDecoder_OnDecode(Bitmap decodedImage)
         {
-            //Dispatcher.BeginInvoke(new Action(() =>
-            //{
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
                 VideoField.Source = ToBitmapImage(decodedImage);
-            //}));
+            }));
         }
 
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
