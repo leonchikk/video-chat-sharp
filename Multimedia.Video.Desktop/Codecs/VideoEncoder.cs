@@ -14,8 +14,8 @@ namespace Multimedia.Video.Desktop.Codecs
         private const string _dllName = "openh264-2.1.1-win32.dll";
         private const int _requiredFramesAmountToDencode = 1;
 
-        private readonly Encoder _encoder;
-        private readonly MemoryStream _videoStream;
+        private Encoder _encoder;
+        private MemoryStream _videoStream;
 
         private int _fps;
         private AviWriter _aviWriter;
@@ -29,9 +29,6 @@ namespace Multimedia.Video.Desktop.Codecs
 
         public VideoEncoder()
         {
-            _encoder = new Encoder(_dllName);
-            _videoStream = new MemoryStream();
-
             _onEncode = (data, length, frameType) =>
             {
                 var keyFrame = (frameType == FrameType.IDR) || (frameType == FrameType.I);
@@ -83,6 +80,9 @@ namespace Multimedia.Video.Desktop.Codecs
             {
                 throw new ArgumentNullException(nameof(capability));
             }
+
+            _encoder = new Encoder(_dllName);
+            _videoStream = new MemoryStream();
 
             Setup(capability.FrameSize.Width, capability.FrameSize.Height, 1000 * 1000, 60);
         }

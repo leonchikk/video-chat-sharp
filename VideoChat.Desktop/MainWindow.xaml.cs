@@ -4,6 +4,7 @@ using Multimedia.Video.Desktop.Codecs;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -14,6 +15,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using VideoChat.Core.Enumerations;
@@ -29,6 +31,10 @@ namespace VideoChat.Desktop
     {
         private readonly ClientWebSocket _clientSocket;
         private readonly ConcurrentQueue<Packet> _concurrentQueue;
+
+        public DeviceCapabilityViewModel DeviceCapabilityViewModel;
+        public VideoDeviceViewModel VideoDeviceViewModel;
+
 
         public IVideoDevice VideoDevice;
         public IVideoEncoder VideoEncoder;
@@ -133,10 +139,12 @@ namespace VideoChat.Desktop
             if (VideoDevice.CurrentDeviceCapability != null)
             {
                 VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
-                DeviceCapabilitiesList.DataContext = new DeviceCapabilityViewModel(VideoDevice.DeviceCapabilities, VideoDevice.CurrentDeviceCapability);
+                DeviceCapabilityViewModel = new DeviceCapabilityViewModel(VideoDevice.DeviceCapabilities, VideoDevice.CurrentDeviceCapability);
+                DeviceCapabilitiesList.DataContext = DeviceCapabilityViewModel;
             }
 
-            VideoDevicesList.DataContext = new VideoDeviceViewModel(VideoDevice.AvailableDevices, VideoDevice.CurrentDeviceInfo);
+            VideoDeviceViewModel = new VideoDeviceViewModel(VideoDevice.AvailableDevices, VideoDevice.CurrentDeviceInfo);
+            VideoDevicesList.DataContext = VideoDeviceViewModel;
 
             VideoDecoder.OnDecode += VideoDecoder_OnDecode;
             VideoDevice.OnFrame += VideoDevice_OnFrame;
@@ -277,6 +285,22 @@ namespace VideoChat.Desktop
         private void CameraOffButton_Click(object sender, RoutedEventArgs e)
         {
             VideoDevice.Stop();
+        }
+
+        private void DeviceCapabilitiesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var current = DeviceCapabilityViewModel.CurrentCapability;
+
+            VideoEncoder.Setup(current);
+        }
+
+        private void VideoDevicesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var current = VideoDeviceViewModel.CurrentDevice;
+
+            VideoDevice?.SwitchTo(current);
+
+            DeviceCapabilityViewModel = new DeviceCapabilityViewModel(VideoDevice.DeviceCapabilities, VideoDevice.CurrentDeviceCapability);
         }
     }
 }

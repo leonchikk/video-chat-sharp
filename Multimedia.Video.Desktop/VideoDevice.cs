@@ -67,6 +67,7 @@ namespace Multimedia.Video.Desktop
             }
 
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
+            _capabilities = GetCapabilities();
             _currentDeviceInfo = device;
 
             Start();
@@ -85,6 +86,18 @@ namespace Multimedia.Video.Desktop
             {
                 yield return devices[i];
             }
+        }
+
+        private IEnumerable<VideoDeviceCapability> GetCapabilities()
+        {
+            return _captureDevice?.VideoCapabilities.Select(
+               (v, i) => new VideoDeviceCapability()
+               {
+                   FrameSize = v.FrameSize,
+                   DeviceNumber = i,
+                   FrameRate = v.AverageFrameRate
+               }
+            ); 
         }
 
         public void Start()
@@ -119,24 +132,15 @@ namespace Multimedia.Video.Desktop
 
             _currentDeviceInfo = device;
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
-            _capabilities = _captureDevice?.VideoCapabilities.Select(
-                (v, i) => new VideoDeviceCapability()
-                {
-                    FrameSize = v.FrameSize,
-                    DeviceNumber = i,
-                    FrameRate = v.AverageFrameRate
-                }
-             );
+            _capabilities = GetCapabilities();
 
             if (!DeviceCapabilities.Any())
             {
                 return;
             }
 
-            //var index = DeviceCapabilities.Where(x => x.FrameSize.Width == DeviceCapabilities.Min(d => d.FrameSize.Width)).First();
             var capability = DeviceCapabilities.First();
             SetCapability(capability);
-            //SetCapability(index);
         }
     }
 }
