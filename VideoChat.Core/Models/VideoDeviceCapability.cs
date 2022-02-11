@@ -7,5 +7,7 @@ namespace VideoChat.Core.Models
         public int FrameRate { get; set; }
         public int DeviceNumber { get; set; }
         public Size FrameSize { get; set; }
+
+        public string FriendlyName => $"{FrameSize.Width} x {FrameSize.Height}, {FrameRate} FPS";
     }
 }

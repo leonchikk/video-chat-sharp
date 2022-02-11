@@ -115,7 +115,7 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            var device = AvailableDevices.First();
+            var device = AvailableDevices.Last();
 
             _currentDeviceInfo = device;
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
@@ -133,7 +133,7 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            var index = DeviceCapabilities.Where(x => x.FrameSize.Width == DeviceCapabilities.Min(d => d.FrameSize.Width)).First();
+            //var index = DeviceCapabilities.Where(x => x.FrameSize.Width == DeviceCapabilities.Min(d => d.FrameSize.Width)).First();
 
             SetCapability(DeviceCapabilities.First());
             //SetCapability(index);

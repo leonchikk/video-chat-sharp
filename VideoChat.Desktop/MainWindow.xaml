@@ -20,8 +20,18 @@
             SelectedItem="{Binding Path=CurrentDevice}" 
             DisplayMemberPath="Name" 
             HorizontalAlignment="Left" 
-            Margin="485,20,0,0" 
+            Margin="511,20,0,0" 
             VerticalAlignment="Top" 
-            Width="120"/>
+            Width="160"/>
+        <Label Content="Device Capability:" HorizontalAlignment="Left" Margin="382,50,0,0" VerticalAlignment="Top" Height="33" Width="111"/>
+        <ComboBox 
+            x:Name="DeviceCapabilitiesList" 
+            ItemsSource="{Binding Capabilities}" 
+            SelectedItem="{Binding CurrentCapability}" 
+            DisplayMemberPath="FriendlyName" 
+            HorizontalAlignment="Left" 
+            Margin="511,54,0,0" 
+            VerticalAlignment="Top" 
+            Width="160"/>
     </Grid>
 </Window>

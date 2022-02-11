@@ -133,6 +133,7 @@ namespace VideoChat.Desktop
             if (VideoDevice.CurrentDeviceCapability != null)
             {
                 VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
+                DeviceCapabilitiesList.DataContext = new DeviceCapabilityViewModel(VideoDevice.DeviceCapabilities, VideoDevice.CurrentDeviceCapability);
             }
 
             VideoDevicesList.DataContext = new VideoDeviceViewModel(VideoDevice.AvailableDevices, VideoDevice.CurrentDeviceInfo);
