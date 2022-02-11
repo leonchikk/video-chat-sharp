@@ -27,7 +27,7 @@
         <ComboBox 
             x:Name="DeviceCapabilitiesList" 
             ItemsSource="{Binding Capabilities}" 
-            SelectedItem="{Binding CurrentCapability}" 
+            SelectedItem="{Binding Path=CurrentCapability}" 
             DisplayMemberPath="FriendlyName" 
             HorizontalAlignment="Left" 
             Margin="511,54,0,0" 
