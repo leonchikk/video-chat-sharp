@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using VideoChat.Core.Models;
 
 namespace VideoChat.Desktop.ViewModels
@@ -13,7 +14,7 @@ namespace VideoChat.Desktop.ViewModels
         public VideoDeviceViewModel(IEnumerable<VideoDeviceInfo> devices, VideoDeviceInfo currentDevice)
         {
             Devices = new ObservableCollection<VideoDeviceInfo>(devices);
-            CurrentDevice = currentDevice;
+            CurrentDevice = Devices.FirstOrDefault(x => x.Name == currentDevice.Name);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

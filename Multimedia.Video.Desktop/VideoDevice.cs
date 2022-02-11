@@ -134,8 +134,8 @@ namespace Multimedia.Video.Desktop
             }
 
             //var index = DeviceCapabilities.Where(x => x.FrameSize.Width == DeviceCapabilities.Min(d => d.FrameSize.Width)).First();
-
-            SetCapability(DeviceCapabilities.First());
+            var capability = DeviceCapabilities.First();
+            SetCapability(capability);
             //SetCapability(index);
         }
     }

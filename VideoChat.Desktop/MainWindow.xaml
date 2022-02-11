@@ -17,7 +17,7 @@
         <ComboBox 
             Name="VideoDevicesList" 
             ItemsSource="{Binding Devices}" 
-            SelectedItem="{Binding Path=CurrentDevice}" 
+            SelectedItem="{Binding Path=CurrentDevice, Mode=TwoWay}" 
             DisplayMemberPath="Name" 
             HorizontalAlignment="Left" 
             Margin="511,20,0,0" 
@@ -27,7 +27,7 @@
         <ComboBox 
             x:Name="DeviceCapabilitiesList" 
             ItemsSource="{Binding Capabilities}" 
-            SelectedItem="{Binding Path=CurrentCapability}" 
+            SelectedItem="{Binding CurrentCapability}" 
             DisplayMemberPath="FriendlyName" 
             HorizontalAlignment="Left" 
             Margin="511,54,0,0" 
