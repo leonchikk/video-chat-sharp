@@ -291,7 +291,10 @@ namespace VideoChat.Desktop
         {
             var current = DeviceCapabilityViewModel.CurrentCapability;
 
-            VideoEncoder.Setup(current);
+            VideoDevice?.Stop();
+            VideoDevice?.SetCapability(current);
+            VideoEncoder?.Setup(current);
+            VideoDevice?.Start();
         }
 
         private void VideoDevicesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
