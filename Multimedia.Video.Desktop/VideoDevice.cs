@@ -56,12 +56,12 @@ namespace Multimedia.Video.Desktop
 
         public void SwitchTo(VideoDeviceInfo device)
         {
-            if (_captureDevice == null)
+            if (device == null)
             {
                 return;
             }
 
-            if (_captureDevice.IsRunning)
+            if (_captureDevice != null && _captureDevice.IsRunning)
             {
                 Stop();
             }
@@ -70,12 +70,12 @@ namespace Multimedia.Video.Desktop
             _capabilities = GetCapabilities();
             _currentDeviceInfo = device;
 
-            Start();
+            SetCapability(CurrentDeviceCapability);
         }
 
         private void CaptureNewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-            OnFrame.Invoke(eventArgs.Frame);
+            OnFrame?.Invoke(eventArgs.Frame);
         }
 
         private IEnumerable<FilterInfo> GetDevices()
@@ -118,6 +118,7 @@ namespace Multimedia.Video.Desktop
 
         public void Stop()
         {
+            _captureDevice.NewFrame -= CaptureNewFrame;
             _captureDevice?.Stop();
         }
 
@@ -128,7 +129,7 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            var device = AvailableDevices.Last();
+            var device = AvailableDevices.First();
 
             _currentDeviceInfo = device;
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
@@ -139,7 +140,7 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            var capability = DeviceCapabilities.First();
+            var capability = DeviceCapabilities.ToList()[1];
             SetCapability(capability);
         }
     }

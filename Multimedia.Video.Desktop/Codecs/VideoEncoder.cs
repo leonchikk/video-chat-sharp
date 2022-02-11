@@ -12,7 +12,7 @@ namespace Multimedia.Video.Desktop.Codecs
     public class VideoEncoder : IVideoEncoder
     {
         private const string _dllName = "openh264-2.1.1-win32.dll";
-        private const int _requiredFramesAmountToDencode = 1;
+        private const int _requiredFramesAmountToDencode = 3;
 
         private Encoder _encoder;
         private MemoryStream _videoStream;
@@ -69,7 +69,7 @@ namespace Multimedia.Video.Desktop.Codecs
 
             _aviWriter = new AviWriter(_videoStream, "H264", width, height, _fps); //TODO: Consider some way to put here configuration
             //FRAME RATE INTERVAL AND FPS ARE INDEPENDENT FROM DEVICE FRAME RATE
-            _encoder.Setup(width, height, bitrate, _fps, 0.02f, _onEncode, _onEncodeFinish); // 0.02f - 60 fps, 0.04, 00.8 - 30fps
+            _encoder.Setup(width, height, bitrate, _fps, 0.04f, _onEncode, _onEncodeFinish); // 0.02f - 60 fps, 0.04, 00.8 - 30fps
 
             _isSetuped = true;
         }
