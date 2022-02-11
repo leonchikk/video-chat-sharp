@@ -135,7 +135,7 @@ namespace VideoChat.Desktop
                 VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
             }
 
-            VideoDevicesList.DataContext = new VideoDeviceViewModel(VideoDevice.AvailableDevices);
+            VideoDevicesList.DataContext = new VideoDeviceViewModel(VideoDevice.AvailableDevices, VideoDevice.CurrentDeviceInfo);
 
             VideoDecoder.OnDecode += VideoDecoder_OnDecode;
             VideoDevice.OnFrame += VideoDevice_OnFrame;

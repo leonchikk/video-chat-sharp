@@ -7,11 +7,13 @@ namespace VideoChat.Desktop.ViewModels
 {
     public class VideoDeviceViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<VideoDeviceInfo> Devices { get; private set; }
+        public VideoDeviceInfo CurrentDevice { get; set; }
+        public ObservableCollection<VideoDeviceInfo> Devices { get; set; }
 
-        public VideoDeviceViewModel(IEnumerable<VideoDeviceInfo> devices)
+        public VideoDeviceViewModel(IEnumerable<VideoDeviceInfo> devices, VideoDeviceInfo currentDevice)
         {
             Devices = new ObservableCollection<VideoDeviceInfo>(devices);
+            CurrentDevice = currentDevice;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

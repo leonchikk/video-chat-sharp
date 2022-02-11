@@ -13,6 +13,7 @@ namespace VideoChat.Core.Multimedia
         IEnumerable<VideoDeviceCapability> DeviceCapabilities { get; }
 
         VideoDeviceCapability CurrentDeviceCapability { get; }
+        VideoDeviceInfo CurrentDeviceInfo { get; }
 
         void SwitchTo(VideoDeviceInfo device);
         void SetCapability(VideoDeviceCapability capability);

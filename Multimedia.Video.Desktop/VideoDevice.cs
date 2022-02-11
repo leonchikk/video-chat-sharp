@@ -20,8 +20,13 @@ namespace Multimedia.Video.Desktop
         public IEnumerable<VideoDeviceInfo> AvailableDevices => _captureDevices;
         public IEnumerable<VideoDeviceCapability> DeviceCapabilities => _capabilities;
 
+
         private VideoDeviceCapability _currentDeviceCapability;
         public VideoDeviceCapability CurrentDeviceCapability => _currentDeviceCapability;
+
+        private VideoDeviceInfo _currentDeviceInfo;
+        public VideoDeviceInfo CurrentDeviceInfo => _currentDeviceInfo;
+
 
         public VideoDevice()
         {
@@ -62,6 +67,7 @@ namespace Multimedia.Video.Desktop
             }
 
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
+            _currentDeviceInfo = device;
 
             Start();
         }
@@ -109,7 +115,10 @@ namespace Multimedia.Video.Desktop
                 return;
             }
 
-            _captureDevice = new VideoCaptureDevice(AvailableDevices.First().MonikerString);
+            var device = AvailableDevices.First();
+
+            _currentDeviceInfo = device;
+            _captureDevice = new VideoCaptureDevice(device.MonikerString);
             _capabilities = _captureDevice?.VideoCapabilities.Select(
                 (v, i) => new VideoDeviceCapability()
                 {
