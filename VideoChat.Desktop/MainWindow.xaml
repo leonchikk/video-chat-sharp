@@ -14,6 +14,6 @@
         <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="243,54,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="CameraOnButton_Click" x:Name="CameraOnButton" Content="Camera On" HorizontalAlignment="Left" Margin="116,20,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="CameraOffButton_Click"  x:Name="CameraOffButton" Content="Camera Off" HorizontalAlignment="Left" Margin="243,20,0,0" VerticalAlignment="Top" Width="75"/>
-        <ComboBox Name="VideoDevicesList" ItemsSource="{Binding Devices}" HorizontalAlignment="Left" Margin="485,20,0,0" VerticalAlignment="Top" Width="120"/>
+        <ComboBox Name="VideoDevicesList" ItemsSource="{Binding Devices}" DisplayMemberPath="Name" HorizontalAlignment="Left" Margin="485,20,0,0" VerticalAlignment="Top" Width="120"/>
     </Grid>
 </Window>
