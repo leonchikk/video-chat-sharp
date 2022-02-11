@@ -19,6 +19,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using VideoChat.Core.Enumerations;
+using VideoChat.Core.Helpers;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 using VideoChat.Core.Multimedia.Codecs;
