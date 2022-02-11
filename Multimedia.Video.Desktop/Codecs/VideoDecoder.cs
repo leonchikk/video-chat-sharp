@@ -17,7 +17,7 @@ namespace Multimedia.Video.Desktop.Codecs
 
         public void Decode(byte[] buffer)
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 using (var stream = new MemoryStream(buffer))
                 {
@@ -34,6 +34,8 @@ namespace Multimedia.Video.Desktop.Codecs
                             if (decodedImage == null) continue;
 
                             OnDecode?.Invoke(decodedImage);
+
+                            await Task.Delay(1000 / 60);
                         }
                     }
                 }

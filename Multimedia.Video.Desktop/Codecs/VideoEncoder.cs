@@ -81,6 +81,11 @@ namespace Multimedia.Video.Desktop.Codecs
                 throw new ArgumentNullException(nameof(capability));
             }
 
+            if (_encoder != null)
+            {
+                _encoder.Dispose();
+            }
+
             _encoder = new Encoder(_dllName);
             _videoStream = new MemoryStream();
 
