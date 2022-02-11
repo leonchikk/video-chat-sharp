@@ -49,7 +49,8 @@
     <Compile Include="Models\EventArgs\NetworkMessageReceivedEventArgs.cs" />
     <Compile Include="Models\EventArgs\NewFrameEventArgs.cs" />
     <Compile Include="Models\VideoDeviceInfo.cs" />
-    <Compile Include="Multimedia\Codecs\IVideoCodec.cs" />
+    <Compile Include="Multimedia\Codecs\IVideoEncoder.cs" />
+    <Compile Include="Multimedia\Codecs\IVideoDecoder.cs" />
     <Compile Include="Multimedia\IInputAudioDevice.cs" />
     <Compile Include="Multimedia\IOutputAudioDevice.cs" />
     <Compile Include="Multimedia\IVideoDevice.cs" />

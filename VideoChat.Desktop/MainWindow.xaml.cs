@@ -30,7 +30,8 @@ namespace VideoChat.Desktop
         private readonly ConcurrentQueue<Packet> _concurrentQueue;
 
         public IVideoDevice VideoDevice;
-        public IVideoCodec VideoCodec;
+        public IVideoEncoder VideoEncoder;
+        public IVideoDecoder VideoDecoder;
         public IInputAudioDevice InputAudioDevice;
         public IOutputAudioDevice OutputAudioDevice;
 
@@ -125,15 +126,16 @@ namespace VideoChat.Desktop
             InputAudioDevice = new InputAudioDevice();
             OutputAudioDevice = new OutputAudioDevice();
             VideoDevice = new VideoDevice();
-            VideoCodec = new H264Codec();
+            VideoEncoder = new VideoEncoder();
+            VideoDecoder = new VideoDecoder();
 
             if (VideoDevice.CurrentDeviceCapability != null)
             {
-                VideoCodec.Setup(VideoDevice.CurrentDeviceCapability);
+                VideoEncoder.Setup(VideoDevice.CurrentDeviceCapability);
             }
 
             VideoDevice.OnFrame += VideoDevice_OnFrame;
-            VideoCodec.OnEncode += VideoCodec_OnEncode;
+            VideoEncoder.OnEncode += VideoCodec_OnEncode;
             InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
             OutputAudioDevice.Start();
         }
@@ -158,7 +160,7 @@ namespace VideoChat.Desktop
 
         private void VideoDevice_OnFrame(Bitmap bitmap)
         {
-            VideoCodec?.Encode(bitmap);
+            VideoEncoder?.Encode(bitmap);
         }
 
         private async Task ProccesQueue()
@@ -201,13 +203,12 @@ namespace VideoChat.Desktop
             switch (packet.Type)
             {
                 case PacketTypeEnum.Video:
-                    foreach (var decodedImage in VideoCodec?.Decode(packet.PayloadBuffer))
+
+                    VideoDecoder.Decode(packet.PayloadBuffer, new Action<Bitmap>((decodedImage) =>
                     {
-                        Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            VideoField.Source = ToBitmapImage(decodedImage);
-                        }));
-                    }
+                        VideoField.Source = ToBitmapImage(decodedImage);
+                    }));
+
                     break;
                 case PacketTypeEnum.Audio:
                     var buffer = packet.PayloadBuffer;

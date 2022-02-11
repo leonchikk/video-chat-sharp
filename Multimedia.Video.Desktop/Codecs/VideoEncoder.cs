@@ -1,24 +1,20 @@
 ﻿using Multimedia.Video.Desktop.AVI;
-using Multimedia.Video.Desktop.AVI.RIFF;
 using OpenH264Lib;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia.Codecs;
 using static OpenH264Lib.Encoder;
 
 namespace Multimedia.Video.Desktop.Codecs
 {
-    public class H264Codec : IVideoCodec
+    public class VideoEncoder : IVideoEncoder
     {
         private const string _dllName = "openh264-2.1.1-win32.dll";
         private const int _requiredFramesAmountToDencode = 1;
 
         private readonly Encoder _encoder;
-        private readonly Decoder _decoder;
         private readonly MemoryStream _videoStream;
 
         private int _fps;
@@ -29,18 +25,13 @@ namespace Multimedia.Video.Desktop.Codecs
         private bool _disposed = false;
         private bool _isSetuped = false;
 
-        public int EncodeVideoLatency => _requiredFramesAmountToDencode * (1000 / _fps);
-
-        public bool IsSetuped => _isSetuped;
-
         public event Action<byte[]> OnEncode;
 
-        public H264Codec()
+        public VideoEncoder()
         {
             _encoder = new Encoder(_dllName);
-            _decoder = new Decoder(_dllName);
             _videoStream = new MemoryStream();
-            
+
             _onEncode = (data, length, frameType) =>
             {
                 var keyFrame = (frameType == FrameType.IDR) || (frameType == FrameType.I);
@@ -53,7 +44,7 @@ namespace Multimedia.Video.Desktop.Codecs
                     return;
 
                 _capturedFramesCount = 0;
-                 _videoStream.Seek(0, SeekOrigin.Begin);
+                _videoStream.Seek(0, SeekOrigin.Begin);
 
                 using (var outputStream = new MemoryStream())
                 {
@@ -96,32 +87,9 @@ namespace Multimedia.Video.Desktop.Codecs
             Setup(capability.FrameSize.Width, capability.FrameSize.Height, 1000 * 1000, 60);
         }
 
-        public IEnumerable<Bitmap> Decode(byte[] stream)
-        {
-            var decoder = new Decoder(_dllName);
-
-            using (var outputStream = new MemoryStream(stream))
-            {
-                var riff = new RiffFile(outputStream);
-
-                var chunks = riff.Chunks.OfType<RiffChunk>().Where(x => x.FourCC == "00dc");
-
-                foreach (var chunk in chunks)
-                {
-                    //Thread.Sleep(1000 / _fps);
-
-                    var frame = chunk.ReadToEnd();
-                    var image = decoder.Decode(frame, frame.Length);
-                    if (image == null) continue;
-
-                    yield return image;
-                }
-            }
-        }
-
         public void Encode(Bitmap bitmap)
         {
-            if (!IsSetuped)
+            if (!_isSetuped)
             {
                 throw new Exception("Encoder is not setuped");
             }
@@ -138,7 +106,6 @@ namespace Multimedia.Video.Desktop.Codecs
             _disposed = true;
 
             _encoder.Dispose();
-            _decoder.Dispose();
         }
     }
 }
