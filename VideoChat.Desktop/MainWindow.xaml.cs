@@ -32,6 +32,9 @@ namespace VideoChat.Desktop
     {
         private readonly ClientWebSocket _clientSocket;
         private readonly ConcurrentQueue<Packet> _concurrentQueue;
+        private readonly System.Timers.Timer _fpsTimer;
+        private int _frameCount = 0;
+        private int _incomingFrameCount = 0;
 
         public DeviceCapabilityViewModel DeviceCapabilityViewModel;
         public VideoDeviceViewModel VideoDeviceViewModel;
@@ -47,7 +50,27 @@ namespace VideoChat.Desktop
 
         public MainWindow()
         {
+            _fpsTimer = new System.Timers.Timer(1000);
             _concurrentQueue = new ConcurrentQueue<Packet>();
+
+            _fpsTimer.Elapsed += (s, e) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (_frameCount > 0)
+                    {
+                        FPS.Content = _frameCount;
+                        _frameCount = 0;
+                    }
+
+                    if (_incomingFrameCount > 0)
+                    {
+                        FPS_Incoming.Content = _incomingFrameCount;
+                        _incomingFrameCount = 0;
+                    }
+                }));
+            };
+            _fpsTimer.Start();
 
             using (var httpClient = new HttpClient())
             {
@@ -158,6 +181,7 @@ namespace VideoChat.Desktop
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
+                _incomingFrameCount++;
                 VideoField.Source = ToBitmapImage(decodedImage);
             }));
         }
@@ -182,6 +206,8 @@ namespace VideoChat.Desktop
 
         private void VideoDevice_OnFrame(Bitmap bitmap)
         {
+            _frameCount++;
+
             VideoEncoder?.Encode(bitmap);
         }
 
@@ -266,6 +292,7 @@ namespace VideoChat.Desktop
             VideoDevice.Stop();
             InputAudioDevice.Stop();
             OutputAudioDevice.Stop();
+            _fpsTimer.Start();
         }
 
         private void MicroOnButton_Click(object sender, RoutedEventArgs e)
@@ -295,7 +322,6 @@ namespace VideoChat.Desktop
             VideoDevice?.Stop();
             VideoDevice?.SetCapability(current);
             VideoEncoder?.Setup(current);
-            VideoDevice?.Start();
         }
 
         private void VideoDevicesList_SelectionChanged(object sender, SelectionChangedEventArgs e)

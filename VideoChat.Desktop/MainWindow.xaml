@@ -8,7 +8,7 @@
         Closed="Window_Closed"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Image x:Name="VideoField" Margin="243,135,301,84" />
+        <Image x:Name="VideoField" Margin="243,135,301,84"/>
         <Label Content="Video Device:" HorizontalAlignment="Left" Margin="382,17,0,0" VerticalAlignment="Top" Height="33" Width="86"/>
         <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" HorizontalAlignment="Left" Margin="116,54,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="243,54,0,0" VerticalAlignment="Top" Width="75"/>
@@ -35,5 +35,9 @@
             VerticalAlignment="Top" 
             SelectionChanged="DeviceCapabilitiesList_SelectionChanged"
             Width="160"/>
+        <Label Content="FPS:" HorizontalAlignment="Left" Margin="684,17,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
+        <Label Name="FPS" HorizontalAlignment="Left" Margin="729,17,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
+        <Label Content="FPS:" HorizontalAlignment="Left" Margin="246,102,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
+        <Label x:Name="FPS_Incoming" HorizontalAlignment="Left" Margin="291,102,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
     </Grid>
 </Window>
