@@ -74,7 +74,8 @@ namespace VideoChat.Desktop
 
             using (var httpClient = new HttpClient())
             {
-                var response = httpClient.PostAsync("http://192.168.0.107:5000/api/auth", null)
+                //http://192.168.0.107:5000
+                var response = httpClient.PostAsync("https://video-chat-sharp.azurewebsites.net/api/auth", null)
                            .ConfigureAwait(false)
                            .GetAwaiter()
                            .GetResult();
@@ -86,7 +87,7 @@ namespace VideoChat.Desktop
 
                 _clientSocket = new ClientWebSocket();
                 _clientSocket.Options.SetRequestHeader("Authorization", jwtToken);
-                _clientSocket.ConnectAsync(new Uri("ws://192.168.0.107:5000"), CancellationToken.None)
+                _clientSocket.ConnectAsync(new Uri("wss://video-chat-sharp.azurewebsites.net:443"), CancellationToken.None)
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
