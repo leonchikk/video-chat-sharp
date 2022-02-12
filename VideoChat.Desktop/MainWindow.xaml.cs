@@ -103,7 +103,7 @@ namespace VideoChat.Desktop
 
                         receivedBytes.Clear();
 
-                        using (var stream = new MemoryStream(buffer.Decompress()))
+                        using (var stream = new MemoryStream(buffer))
                         using (var binaryReader = new BinaryReader(stream))
                         {
                             var packetTypeEnum = (PacketTypeEnum)binaryReader.ReadByte();
@@ -205,7 +205,7 @@ namespace VideoChat.Desktop
                         binaryWriter.Write(buffer);
 
                         _clientSocket.SendAsync(
-                                new ArraySegment<byte>(stream.ToArray().Compress()),
+                                new ArraySegment<byte>(stream.ToArray()),
                                 WebSocketMessageType.Binary,
                                 true,
                                 CancellationToken.None)
