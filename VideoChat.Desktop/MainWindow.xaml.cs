@@ -12,6 +12,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -75,6 +76,7 @@ namespace VideoChat.Desktop
             using (var httpClient = new HttpClient())
             {
                 //http://192.168.0.107:5000
+                //https://video-chat-sharp.azurewebsites.net
                 var response = httpClient.PostAsync("https://video-chat-sharp.azurewebsites.net/api/auth", null)
                            .ConfigureAwait(false)
                            .GetAwaiter()
@@ -87,7 +89,7 @@ namespace VideoChat.Desktop
 
                 _clientSocket = new ClientWebSocket();
                 _clientSocket.Options.SetRequestHeader("Authorization", jwtToken);
-                _clientSocket.ConnectAsync(new Uri("wss://video-chat-sharp.azurewebsites.net:443"), CancellationToken.None)
+                _clientSocket.ConnectAsync(new Uri("ws://video-chat-sharp.azurewebsites.net"), CancellationToken.None)
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
@@ -114,7 +116,7 @@ namespace VideoChat.Desktop
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2048]; // 1016 is one chunck
+                    byte[] tempStorage = new byte[2]; // 1016 is one chunck
                     var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
 
                     receivedBytes.AddRange(tempStorage);

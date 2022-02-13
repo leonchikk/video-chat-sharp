@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using VideoChat.API.Sockets;
 
 namespace VideoChat.API.Controllers
 {
@@ -6,9 +7,17 @@ namespace VideoChat.API.Controllers
     [ApiController]
     public class HealthCheckController : ControllerBase
     {
+        private readonly ConnectionManager _connectionManager;
+
+        public HealthCheckController(ConnectionManager connectionManager)
+        {
+            _connectionManager = connectionManager;
+        }
+
+        [HttpGet]
         public IActionResult HealthCheck()
         {
-            return Ok("API is available");
+            return Ok($"API is available. Current online : {_connectionManager.Connections.Count}");
         }
     }
 }

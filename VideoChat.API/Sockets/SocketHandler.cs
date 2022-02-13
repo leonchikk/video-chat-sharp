@@ -25,7 +25,7 @@ namespace VideoChat.API.Sockets
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2048]; // 1016 is one chunck
+                    byte[] tempStorage = new byte[2]; // 1016 is one chunck
                     var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
 
                     receivedBytes.AddRange(tempStorage);
