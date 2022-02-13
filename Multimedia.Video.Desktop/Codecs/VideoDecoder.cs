@@ -17,10 +17,6 @@ namespace Multimedia.Video.Desktop.Codecs
 
         public void Decode(byte[] buffer)
         {
-            var t3 = buffer[buffer.Length - 3];
-            var t2 = buffer[buffer.Length - 2];
-            var t1 = buffer[buffer.Length - 1];
-
             Task.Run(async () =>
             {
                 using (var stream = new MemoryStream(buffer))

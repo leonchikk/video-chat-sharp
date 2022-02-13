@@ -54,6 +54,26 @@ namespace Multimedia.Audio.Desktop
 
         private void RecorderOnDataAvailable(object sender, WaveInEventArgs e)
         {
+            //var r = new List<string>();
+
+            //var bytes = new List<byte>();
+
+            short[] buffer = new short[e.BytesRecorded / 2];
+            Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+
+            //for (int n = 0; n < buffer.Length; n++)
+            //{
+            //    if (IsSilence(buffer[n], 80))
+            //        r.Add("Silence");
+            //    else
+            //    {
+            //        r.Add("Voice");
+            //    }
+            //}
+
+            if (buffer.All(x => IsSilence(x, 45)))
+                return;
+
             OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(e.Buffer, e.BytesRecorded));
         }
 
@@ -91,6 +111,12 @@ namespace Multimedia.Audio.Desktop
             }
 
             SwitchTo(DeviceCapabilities.First());
+        }
+
+        private bool IsSilence(float amplitude, sbyte threshold)
+        {
+            double dB = 20 * Math.Log10(Math.Abs(amplitude));
+            return dB < threshold;
         }
     }
 }
