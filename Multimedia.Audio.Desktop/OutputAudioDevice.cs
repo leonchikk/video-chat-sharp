@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using Multimedia.Audio.Desktop.Codecs;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,10 @@ namespace Multimedia.Audio.Desktop
 
             await Task.Delay(desireLatency);
 
-            _bufferedWaveProvider?.AddSamples(buffer, 0, buffer.Length);
+            var codec = new G722AudioCodec();
+            var decoded = codec.Decode(buffer, buffer.Length);
+
+            _bufferedWaveProvider?.AddSamples(decoded, 0, decoded.Length);
         }
 
         public void SwitchTo(AudioDeviceCapability capability)
@@ -55,7 +59,7 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 1));
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 1));
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider); 
