@@ -39,7 +39,7 @@ namespace VideoChat.API.Sockets
                         receivedBytes.Clear();
 
                         //Send received data to other users
-                        await HandleRequest(accountId, buffer, socket);
+                        HandleRequest(accountId, buffer, socket);
 
                     }
                 }
@@ -69,7 +69,7 @@ namespace VideoChat.API.Sockets
             }
         }
 
-        private async Task HandleRequest(string accountId, byte[] buffer, WebSocket webSocket)
+        private void HandleRequest(string accountId, byte[] buffer, WebSocket webSocket)
         {
             var otherRecipentSockets = _connectionManager.Connections
                 .Where(x => x.Key != accountId)
@@ -77,7 +77,7 @@ namespace VideoChat.API.Sockets
 
             foreach (var recipientSocket in otherRecipentSockets)
             {
-                await SendAsync(recipientSocket, buffer, WebSocketMessageType.Binary);
+               _ = SendAsync(recipientSocket, buffer, WebSocketMessageType.Binary);
             }
         }
     }
