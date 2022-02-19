@@ -37,9 +37,7 @@ namespace VideoChat.API.Sockets
         {
             var id = GetAccountId(socket);
 
-            Connections.TryRemove(id, out var _);
-
-            await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+            await CloseConnection(id);
         }
 
         public async Task CloseConnection(string id)

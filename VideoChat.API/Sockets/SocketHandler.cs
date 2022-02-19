@@ -48,6 +48,8 @@ namespace VideoChat.API.Sockets
                     await _connectionManager.CloseConnection(socket);
                 }
             }
+
+            await _connectionManager.CloseConnection(accountId);
         }
 
         private async Task SendAsync(WebSocket socket, ArraySegment<byte> buffer, WebSocketMessageType socketMessageType = WebSocketMessageType.Text)
