@@ -19,10 +19,10 @@ namespace Multimedia.Audio.Desktop
 
         public OutputAudioDevice()
         {
-            SwitchTo(DeviceCapabilities?.First());
+            SwitchTo(Options?.First());
         }
 
-        public IEnumerable<AudioDeviceCapability> DeviceCapabilities
+        public IEnumerable<AudioDeviceOptions> Options
         {
             get
             {
@@ -30,7 +30,7 @@ namespace Multimedia.Audio.Desktop
                 for (int waveOutDevice = 0; waveOutDevice < waveOutDevices; waveOutDevice++)
                 {
                     WaveOutCapabilities deviceInfo = WaveOut.GetCapabilities(waveOutDevice);
-                    yield return new AudioDeviceCapability(waveOutDevice, deviceInfo.Channels, deviceInfo.ProductName);
+                    yield return new AudioDeviceOptions(waveOutDevice, deviceInfo.Channels, deviceInfo.ProductName);
                 }
             }
         }
@@ -51,7 +51,7 @@ namespace Multimedia.Audio.Desktop
             _bufferedWaveProvider?.AddSamples(decoded, 0, decoded.Length);
         }
 
-        public void SwitchTo(AudioDeviceCapability capability)
+        public void SwitchTo(AudioDeviceOptions capability)
         {
             //TODO: Add error event here
             if (capability == null)

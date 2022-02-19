@@ -12,17 +12,17 @@ namespace Multimedia.Video.Desktop
     public class VideoDevice : IVideoDevice
     {
         private IEnumerable<VideoDeviceInfo> _captureDevices;
-        private IEnumerable<VideoDeviceCapability> _capabilities;
+        private IEnumerable<VideoDeviceOptions> _capabilities;
         private VideoCaptureDevice _captureDevice;
 
         public event Action<Bitmap> OnFrame;
 
         public IEnumerable<VideoDeviceInfo> AvailableDevices => _captureDevices;
-        public IEnumerable<VideoDeviceCapability> DeviceCapabilities => _capabilities;
+        public IEnumerable<VideoDeviceOptions> DeviceCapabilities => _capabilities;
 
 
-        private VideoDeviceCapability _currentDeviceCapability;
-        public VideoDeviceCapability CurrentDeviceCapability => _currentDeviceCapability;
+        private VideoDeviceOptions _currentDeviceCapability;
+        public VideoDeviceOptions CurrentDeviceCapability => _currentDeviceCapability;
 
         private VideoDeviceInfo _currentDeviceInfo;
         public VideoDeviceInfo CurrentDeviceInfo => _currentDeviceInfo;
@@ -38,7 +38,7 @@ namespace Multimedia.Video.Desktop
             Setup();
         }
 
-        public void SetCapability(VideoDeviceCapability capability)
+        public void SetCapability(VideoDeviceOptions capability)
         {
             if (_captureDevice == null)
             {
@@ -88,10 +88,10 @@ namespace Multimedia.Video.Desktop
             }
         }
 
-        private IEnumerable<VideoDeviceCapability> GetCapabilities()
+        private IEnumerable<VideoDeviceOptions> GetCapabilities()
         {
             return _captureDevice?.VideoCapabilities.Select(
-               (v, i) => new VideoDeviceCapability()
+               (v, i) => new VideoDeviceOptions()
                {
                    FrameSize = v.FrameSize,
                    DeviceNumber = i,

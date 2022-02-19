@@ -8,12 +8,12 @@ namespace VideoChat.Desktop.ViewModels
 {
     public class DeviceCapabilityViewModel : INotifyPropertyChanged
     {
-        public VideoDeviceCapability CurrentCapability { get; set; }
-        public ObservableCollection<VideoDeviceCapability> Capabilities { get; set; }
+        public VideoDeviceOptions CurrentCapability { get; set; }
+        public ObservableCollection<VideoDeviceOptions> Capabilities { get; set; }
 
-        public DeviceCapabilityViewModel(IEnumerable<VideoDeviceCapability> capabilities, VideoDeviceCapability currentCapability)
+        public DeviceCapabilityViewModel(IEnumerable<VideoDeviceOptions> capabilities, VideoDeviceOptions currentCapability)
         {
-            Capabilities = new ObservableCollection<VideoDeviceCapability>(capabilities);
+            Capabilities = new ObservableCollection<VideoDeviceOptions>(capabilities);
             CurrentCapability = currentCapability == null ? Capabilities.FirstOrDefault() : Capabilities.FirstOrDefault(x => x.DeviceNumber == currentCapability.DeviceNumber);
         }
 

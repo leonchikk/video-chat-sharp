@@ -8,7 +8,7 @@ namespace VideoChat.Core.Multimedia.Codecs
     {
         event Action<byte[]> OnEncode;
 
-        void Setup(VideoDeviceCapability capability);
+        void Setup(VideoDeviceOptions capability);
         void Setup(int width = 640, int height = 320, int bitrate = 1000, int fps = 30);
         void Encode(Bitmap bitmap);
     }

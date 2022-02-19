@@ -74,7 +74,7 @@ namespace Multimedia.Video.Desktop.Codecs
             _isSetuped = true;
         }
 
-        public void Setup(VideoDeviceCapability capability)
+        public void Setup(VideoDeviceOptions capability)
         {
             if (capability == null)
             {

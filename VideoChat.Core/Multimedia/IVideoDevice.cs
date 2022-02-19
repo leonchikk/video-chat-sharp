@@ -10,13 +10,13 @@ namespace VideoChat.Core.Multimedia
         event Action<Bitmap> OnFrame;
 
         IEnumerable<VideoDeviceInfo> AvailableDevices { get; }
-        IEnumerable<VideoDeviceCapability> DeviceCapabilities { get; }
+        IEnumerable<VideoDeviceOptions> DeviceCapabilities { get; }
 
-        VideoDeviceCapability CurrentDeviceCapability { get; }
+        VideoDeviceOptions CurrentDeviceCapability { get; }
         VideoDeviceInfo CurrentDeviceInfo { get; }
 
         void SwitchTo(VideoDeviceInfo device);
-        void SetCapability(VideoDeviceCapability capability);
+        void SetCapability(VideoDeviceOptions capability);
 
         void Start();
         void Stop();

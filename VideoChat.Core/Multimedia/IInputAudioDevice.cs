@@ -8,9 +8,9 @@ namespace VideoChat.Core.Multimedia
     {
         event Action<AudioSampleRecordedEventArgs> OnSampleRecorded;
 
-        IEnumerable<AudioDeviceCapability> DeviceCapabilities { get; }
+        IEnumerable<AudioDeviceOptions> Options { get; }
 
-        void SwitchTo(AudioDeviceCapability capability);
+        void SwitchTo(AudioDeviceOptions options);
 
         void Start();
         void Stop();

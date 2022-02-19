@@ -1,8 +1,8 @@
 ﻿namespace VideoChat.Core.Models
 {
-    public class AudioDeviceCapability
+    public class AudioDeviceOptions
     {
-        public AudioDeviceCapability(int deviceNumber, int channels, string name)
+        public AudioDeviceOptions(int deviceNumber, int channels, string name)
         {
             DeviceNumber = deviceNumber;
             Channels = channels;

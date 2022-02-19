@@ -23,7 +23,7 @@ namespace Multimedia.Audio.Desktop
             Setup();
         }
 
-        public IEnumerable<AudioDeviceCapability> DeviceCapabilities
+        public IEnumerable<AudioDeviceOptions> Options
         {
             get
             {
@@ -31,7 +31,7 @@ namespace Multimedia.Audio.Desktop
                 for (int waveInDevice = 0; waveInDevice < waveInDevices; waveInDevice++)
                 {
                     WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(waveInDevice);
-                    yield return new AudioDeviceCapability(waveInDevice, deviceInfo.Channels, deviceInfo.ProductName);
+                    yield return new AudioDeviceOptions(waveInDevice, deviceInfo.Channels, deviceInfo.ProductName);
                 }
             }
         }
@@ -39,7 +39,7 @@ namespace Multimedia.Audio.Desktop
         public event Action<AudioSampleRecordedEventArgs> OnSampleRecorded;
 
         //TODO: Rename AudioDeviceCapability
-        public void SwitchTo(AudioDeviceCapability capability)
+        public void SwitchTo(AudioDeviceOptions capability)
         {
             //TODO: Add error event here
             if (capability == null)
@@ -132,13 +132,13 @@ namespace Multimedia.Audio.Desktop
 
         private void Setup()
         {
-            if (!DeviceCapabilities.Any())
+            if (!Options.Any())
             {
                 //TODO: Add error event here
                 return;
             }
 
-            SwitchTo(DeviceCapabilities.First());
+            SwitchTo(Options.First());
         }
 
         private bool IsSilence(float amplitude, sbyte threshold)

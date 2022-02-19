@@ -44,8 +44,8 @@
   <ItemGroup>
     <Compile Include="Enumerations\PacketTypeEnum.cs" />
     <Compile Include="Helpers\CompressionHelper.cs" />
-    <Compile Include="Models\AudioDeviceCapability.cs" />
-    <Compile Include="Models\VideoDeviceCapability.cs" />
+    <Compile Include="Models\AudioDeviceOptions.cs" />
+    <Compile Include="Models\VideoDeviceOptions.cs" />
     <Compile Include="Models\EventArgs\AudioSampleRecordedEventArgs.cs" />
     <Compile Include="Models\EventArgs\NetworkMessageReceivedEventArgs.cs" />
     <Compile Include="Models\EventArgs\NewFrameEventArgs.cs" />

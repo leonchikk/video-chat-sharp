@@ -2,7 +2,7 @@
 
 namespace VideoChat.Core.Models
 {
-    public class VideoDeviceCapability
+    public class VideoDeviceOptions
     {
         public int FrameRate { get; set; }
         public int DeviceNumber { get; set; }
