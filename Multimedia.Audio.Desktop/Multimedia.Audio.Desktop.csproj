@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Codecs\G722AudioCodec.cs" />
+    <Compile Include="Codecs\OpusAudioCodec.cs" />
     <Compile Include="InputAudioDevice.cs" />
     <Compile Include="OutputAudioDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
