@@ -22,7 +22,8 @@ namespace Multimedia.Video.Desktop
         private VideoDeviceOptions _currentDeviceOption;
         public VideoDeviceOptions CurrentOption => _currentDeviceOption;
 
-        public VideoDeviceInfo Info => throw new NotImplementedException();
+        private VideoDeviceInfo _info;
+        public VideoDeviceInfo Info => _info;
 
         public VideoDevice(VideoDeviceInfo device)
         {
@@ -58,6 +59,7 @@ namespace Multimedia.Video.Desktop
             }
 
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
+            _info = device;
             _options = GetCapabilities();
 
             SetOption(_options.First());

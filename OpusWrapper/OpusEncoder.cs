@@ -44,7 +44,7 @@ namespace FragLabs.Audio.Codecs
             InputSamplingRate = inputSamplingRate;
             InputChannels = inputChannels;
             Application = application;
-            MaxDataBytes = 4000;
+            MaxDataBytes = 6000;
         }
 
         /// <summary>
@@ -72,7 +72,11 @@ namespace FragLabs.Audio.Codecs
             if (length < 0)
                 throw new Exception("Encoding failed - " + ((Errors)length).ToString());
 
-            return encoded;
+            var encodedOptimized = new byte[encodedLength];
+
+            Array.Copy(encoded, 0, encodedOptimized, 0, encodedLength);
+
+            return encodedOptimized;
         }
 
         /// <summary>

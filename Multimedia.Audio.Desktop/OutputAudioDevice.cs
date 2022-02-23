@@ -16,9 +16,12 @@ namespace Multimedia.Audio.Desktop
         private BufferedWaveProvider _bufferedWaveProvider;
         private bool _isSetuped = false;
         private bool _disposed = false;
+        private OpusAudioCodec _codec;
 
         public OutputAudioDevice()
         {
+            _codec = new OpusAudioCodec();
+
             SwitchTo(Options?.First());
         }
 
@@ -43,10 +46,9 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            await Task.Delay(desireLatency);
+            //await Task.Delay(desireLatency);
 
-            var codec = new G722AudioCodec();
-            var decoded = codec.Decode(buffer, buffer.Length);
+            var decoded = _codec.Decode(buffer, buffer.Length);
 
             _bufferedWaveProvider?.AddSamples(decoded, 0, decoded.Length);
         }
@@ -59,7 +61,7 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 1));
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider); 

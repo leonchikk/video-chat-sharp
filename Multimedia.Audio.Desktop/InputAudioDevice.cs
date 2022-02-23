@@ -17,6 +17,7 @@ namespace Multimedia.Audio.Desktop
         private WaveIn _audioRecorder;
         private bool _isSetuped = false;
         private bool _disposed = false;
+        private OpusAudioCodec _codec;
 
         public InputAudioDevice()
         {
@@ -47,11 +48,11 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _audioRecorder = new WaveIn();
+            _audioRecorder = new WaveIn(WaveCallbackInfo.FunctionCallback());
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
-            _audioRecorder.WaveFormat = new WaveFormat(48000, 1);
+            _audioRecorder.WaveFormat = new WaveFormat(48000, 16, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
-            _audioRecorder.BufferMilliseconds = 150;
+            _audioRecorder.BufferMilliseconds = 200;
 
             _isSetuped = true;
         }
@@ -61,48 +62,15 @@ namespace Multimedia.Audio.Desktop
             short[] buffer = new short[e.BytesRecorded];
             Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
 
-            if (buffer.All(x => IsSilence(x, 50)))
+            if (buffer.All(x => IsSilence(x, 45)))
                 return;
 
-            var codec = new G722AudioCodec();
-            var encoded = codec.Encode(e.Buffer, e.BytesRecorded);
+            var samples = _codec.Encode(e.Buffer, 0, e.BytesRecorded);
 
-            OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(encoded, encoded.Length));
-
-            //_writer.Write(e.Buffer, 0, e.BytesRecorded);
-
-            //int oldLength = (int)_audioStream.Length;
-            //if (_writer != null)
-            //    _writer.Write(e.Buffer, 0, e.BytesRecorded);
-
-            //if (_audioStream.Length > 0)
-            //{
-            //    int newLength = (int)_audioStream.Length;
-
-            //    if (oldLength != newLength)
-            //    {
-            //        _audioStream.Seek(0, SeekOrigin.Begin);
-            //        byte[] buf = _audioStream.GetBuffer();
-
-            //        //var reader = new Mp3FileReader(_audioStream);
-            //        //var waveOut = new WaveOut();
-            //        //waveOut.Init(reader);
-            //        //waveOut.Play();
-
-            //        _bufferedWaveProvider?.AddSamples(buf, 0, buf.Length);
-
-            //        Array.Clear(buf, 0, buf.Length);
-
-            //        _audioStream.Seek(0, SeekOrigin.Begin);
-            //        _audioStream.SetLength(0);
-            //        _audioStream.Capacity = 0;
-
-            //        //_bufferedWaveProvider.ClearBuffer();
-
-            //        //_bufferedWaveProvider?.AddSamples(recordedAudioBuffer, 0, recordedAudioBuffer.Length);
-            //        //OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(recordedAudioBuffer, recordedAudioBuffer.Length));
-            //    }
-            //}
+            foreach (var sample in samples)
+            {
+                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length));
+            }
         }
 
         public void Start()
@@ -137,6 +105,8 @@ namespace Multimedia.Audio.Desktop
                 //TODO: Add error event here
                 return;
             }
+
+            _codec = new OpusAudioCodec();
 
             SwitchTo(Options.First());
         }

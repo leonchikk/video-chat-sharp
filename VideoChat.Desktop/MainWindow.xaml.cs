@@ -163,19 +163,18 @@ namespace VideoChat.Desktop
             VideoEncoder = new VideoEncoder();
             VideoDecoder = new VideoDecoder();
 
-            if (VideoDeviceManager.CurrentDevice != null)
+            if (VideoDeviceManager.CurrentDevice.CurrentOption != null)
             {
                 VideoEncoder.Setup(VideoDeviceManager.CurrentDevice.CurrentOption);
                 DeviceCapabilityViewModel = new DeviceCapabilityViewModel(VideoDeviceManager.CurrentDevice.DeviceOptions, VideoDeviceManager.CurrentDevice.CurrentOption);
                 DeviceCapabilitiesList.DataContext = DeviceCapabilityViewModel;
+                VideoDeviceViewModel = new VideoDeviceViewModel(VideoDeviceManager.AvailableDevices, VideoDeviceManager.CurrentDevice?.Info);
+                VideoDevicesList.DataContext = VideoDeviceViewModel;
+
+                VideoDecoder.OnDecode += VideoDecoder_OnDecode;
+                VideoDeviceManager.CurrentDevice.OnFrame += VideoDevice_OnFrame;
+                VideoEncoder.OnEncode += VideoCodec_OnEncode;
             }
-
-            VideoDeviceViewModel = new VideoDeviceViewModel(VideoDeviceManager.AvailableDevices, VideoDeviceManager.CurrentDevice?.Info);
-            VideoDevicesList.DataContext = VideoDeviceViewModel;
-
-            VideoDecoder.OnDecode += VideoDecoder_OnDecode;
-            VideoDeviceManager.CurrentDevice.OnFrame += VideoDevice_OnFrame;
-            VideoEncoder.OnEncode += VideoCodec_OnEncode;
             InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
             OutputAudioDevice.Start();
         }
