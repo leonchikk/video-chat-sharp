@@ -44,7 +44,7 @@ namespace FragLabs.Audio.Codecs
             InputSamplingRate = inputSamplingRate;
             InputChannels = inputChannels;
             Application = application;
-            MaxDataBytes = 6000;
+            MaxDataBytes = 8000;
         }
 
         /// <summary>

@@ -16,9 +16,9 @@ namespace Multimedia.Audio.Desktop.Codecs
 
         public OpusAudioCodec()
         {
-            _segmentFrames = 2880;// 960 * 3;
+            _segmentFrames = 3840;// 960 * 4;
             _encoder = OpusEncoder.Create(48000, 1, FragLabs.Audio.Codecs.Opus.Application.Audio);
-            _encoder.Bitrate = 8192 * 2;
+            _encoder.Bitrate = 8192 * 3;
             _decoder = OpusDecoder.Create(48000, 1);
             _bytesPerSegment = _encoder.FrameByteCount(_segmentFrames);
         }
