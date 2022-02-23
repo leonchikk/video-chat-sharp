@@ -9,5 +9,12 @@ namespace VideoChat.Core.Models
         public Size FrameSize { get; set; }
 
         public string FriendlyName => $"{FrameSize.Width} x {FrameSize.Height}, {FrameRate} FPS";
+
+        public override bool Equals(object obj)
+        {
+            var info = (VideoDeviceOptions)obj;
+
+            return info.DeviceNumber == this.DeviceNumber;
+        }
     }
 }

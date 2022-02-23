@@ -55,6 +55,7 @@
     <Compile Include="Multimedia\IInputAudioDevice.cs" />
     <Compile Include="Multimedia\IOutputAudioDevice.cs" />
     <Compile Include="Multimedia\IVideoDevice.cs" />
+    <Compile Include="Multimedia\IVideoDeviceManager.cs" />
     <Compile Include="Networking\IHttpClientWrapper.cs" />
     <Compile Include="Networking\IWebSocketClient.cs" />
     <Compile Include="Packets\Packet.cs" />

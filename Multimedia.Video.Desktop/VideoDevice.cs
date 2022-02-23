@@ -11,47 +11,38 @@ namespace Multimedia.Video.Desktop
 {
     public class VideoDevice : IVideoDevice
     {
-        private IEnumerable<VideoDeviceInfo> _captureDevices;
-        private IEnumerable<VideoDeviceOptions> _capabilities;
+        private IEnumerable<VideoDeviceOptions> _options;
         private VideoCaptureDevice _captureDevice;
 
         public event Action<Bitmap> OnFrame;
 
-        public IEnumerable<VideoDeviceInfo> AvailableDevices => _captureDevices;
-        public IEnumerable<VideoDeviceOptions> DeviceCapabilities => _capabilities;
+        public IEnumerable<VideoDeviceOptions> DeviceOptions => _options;
 
 
-        private VideoDeviceOptions _currentDeviceCapability;
-        public VideoDeviceOptions CurrentDeviceCapability => _currentDeviceCapability;
+        private VideoDeviceOptions _currentDeviceOption;
+        public VideoDeviceOptions CurrentOption => _currentDeviceOption;
 
-        private VideoDeviceInfo _currentDeviceInfo;
-        public VideoDeviceInfo CurrentDeviceInfo => _currentDeviceInfo;
+        public VideoDeviceInfo Info => throw new NotImplementedException();
 
-
-        public VideoDevice()
+        public VideoDevice(VideoDeviceInfo device)
         {
-            _captureDevices = (
-                GetDevices()
-                    .Select(x => new VideoDeviceInfo(x.Name, x.MonikerString))
-             ).ToList();
-
-            Setup();
+            Setup(device);
         }
 
-        public void SetCapability(VideoDeviceOptions capability)
+        public void SetOption(VideoDeviceOptions option)
         {
             if (_captureDevice == null)
             {
                 return;
             }
 
-            if (capability == null)
+            if (option == null)
             {
                 return;
             }
 
-            _captureDevice.VideoResolution = _captureDevice.VideoCapabilities[capability.DeviceNumber];
-            _currentDeviceCapability = capability;
+            _captureDevice.VideoResolution = _captureDevice.VideoCapabilities[option.DeviceNumber];
+            _currentDeviceOption = option;
         }
 
         public void SwitchTo(VideoDeviceInfo device)
@@ -67,25 +58,14 @@ namespace Multimedia.Video.Desktop
             }
 
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
-            _capabilities = GetCapabilities();
-            _currentDeviceInfo = device;
+            _options = GetCapabilities();
 
-            SetCapability(CurrentDeviceCapability);
+            SetOption(_options.First());
         }
 
         private void CaptureNewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             OnFrame?.Invoke(eventArgs.Frame);
-        }
-
-        private IEnumerable<FilterInfo> GetDevices()
-        {
-            var devices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-
-            for (int i = 0; i < devices.Count; i++)
-            {
-                yield return devices[i];
-            }
         }
 
         private IEnumerable<VideoDeviceOptions> GetCapabilities()
@@ -122,26 +102,18 @@ namespace Multimedia.Video.Desktop
             _captureDevice?.Stop();
         }
 
-        private void Setup()
+        private void Setup(VideoDeviceInfo device)
         {
-            if (!AvailableDevices.Any())
-            {
-                return;
-            }
-
-            var device = AvailableDevices.Last();
-
-            _currentDeviceInfo = device;
             _captureDevice = new VideoCaptureDevice(device.MonikerString);
-            _capabilities = GetCapabilities();
+            _options = GetCapabilities();
 
-            if (!DeviceCapabilities.Any())
+            if (!DeviceOptions.Any())
             {
                 return;
             }
 
-            var capability = DeviceCapabilities.Last();
-            SetCapability(capability);
+            var capability = DeviceOptions.Last();
+            SetOption(capability);
         }
     }
 }
