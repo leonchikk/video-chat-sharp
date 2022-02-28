@@ -1,11 +1,8 @@
 ﻿using Multimedia.Audio.Desktop.Codecs;
-using NAudio.Lame;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 
