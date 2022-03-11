@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
 using VideoChat.Core.Models;
+using VideoChat.Core.Packets;
 
 namespace VideoChat.Core.Networking
 {
-    public interface IWebSocketClient
+    public interface IWebSocketClient: IDisposable
     {
-        event Func<NetworkMessageReceivedEventArgs> OnMessageReceived;
-        event Action OnOpenConnection;
-        event Action OnCloseConnection;
+        event Action<NetworkMessageReceivedEventArgs> OnMessage;
+        event Action OnConnection;
+        event Action OnDisconnect;
 
-        Task Connect();
+        void SendPacket(Packet packet);
+
+        Task Connect(string jwtToken);
         Task Disconnect();
     }
 }

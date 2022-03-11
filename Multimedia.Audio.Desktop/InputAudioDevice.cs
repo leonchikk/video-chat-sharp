@@ -1,7 +1,9 @@
 ﻿using Multimedia.Audio.Desktop.Codecs;
+using Multimedia.Audio.Desktop.Sound;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
@@ -36,7 +38,6 @@ namespace Multimedia.Audio.Desktop
 
         public event Action<AudioSampleRecordedEventArgs> OnSampleRecorded;
 
-        //TODO: Rename AudioDeviceCapability
         public void SwitchTo(AudioDeviceOptions capability)
         {
             //TODO: Add error event here
@@ -47,19 +48,20 @@ namespace Multimedia.Audio.Desktop
 
             _audioRecorder = new WaveIn(WaveCallbackInfo.FunctionCallback());
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
-            _audioRecorder.WaveFormat = new WaveFormat(48000, 16, 1);
+            _audioRecorder.WaveFormat = new WaveFormat(44100, 16, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
-            _audioRecorder.BufferMilliseconds = 200;
+            _audioRecorder.BufferMilliseconds = 100;
+            _audioRecorder.NumberOfBuffers = 2;
 
             _isSetuped = true;
         }
 
         private void RecorderOnDataAvailable(object sender, WaveInEventArgs e)
         {
-            short[] buffer = new short[e.BytesRecorded];
+            short[] buffer = new short[e.BytesRecorded / 2];
             Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
 
-            if (buffer.All(x => IsSilence(x, 45)))
+            if (buffer.All(x => IsSilence(x, 43)))
                 return;
 
             var samples = _codec.Encode(e.Buffer, 0, e.BytesRecorded);

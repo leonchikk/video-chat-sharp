@@ -61,9 +61,11 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(44100, 16, 1));
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
+            _audioPlayer.NumberOfBuffers = 2;
+            _audioPlayer.DesiredLatency = 100;
             _audioPlayer.Init(_bufferedWaveProvider); 
             _isSetuped = true;
         }

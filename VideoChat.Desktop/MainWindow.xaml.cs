@@ -1,29 +1,19 @@
 ﻿using Multimedia.Audio.Desktop;
 using Multimedia.Video.Desktop;
 using Multimedia.Video.Desktop.Codecs;
+using Networking;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Net.Http;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Helpers;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 using VideoChat.Core.Multimedia.Codecs;
+using VideoChat.Core.Networking;
 using VideoChat.Core.Packets;
 using VideoChat.Desktop.ViewModels;
 
@@ -31,8 +21,6 @@ namespace VideoChat.Desktop
 {
     public partial class MainWindow : Window
     {
-        private readonly ClientWebSocket _clientSocket;
-        private readonly ConcurrentQueue<Packet> _concurrentQueue;
         private readonly System.Timers.Timer _fpsTimer;
         private int _frameCount = 0;
         private int _incomingFrameCount = 0;
@@ -40,19 +28,18 @@ namespace VideoChat.Desktop
         public DeviceCapabilityViewModel DeviceCapabilityViewModel;
         public VideoDeviceViewModel VideoDeviceViewModel;
 
-
         public IVideoDeviceManager VideoDeviceManager;
         public IVideoEncoder VideoEncoder;
         public IVideoDecoder VideoDecoder;
         public IInputAudioDevice InputAudioDevice;
         public IOutputAudioDevice OutputAudioDevice;
 
-        public event Action<Packet> OnDataReceive;
+        private IWebSocketClient _webSocketClient;
+        private IHttpClientWrapper _httpClientWrapper;
 
         public MainWindow()
         {
             _fpsTimer = new System.Timers.Timer(1000);
-            _concurrentQueue = new ConcurrentQueue<Packet>();
 
             _fpsTimer.Elapsed += (s, e) =>
             {
@@ -73,85 +60,32 @@ namespace VideoChat.Desktop
             };
             _fpsTimer.Start();
 
-            using (var httpClient = new HttpClient())
-            {
-                //http://192.168.0.107:5000
-                //https://video-chat-sharp.azurewebsites.net
-                var response = httpClient.PostAsync("https://video-chat-sharp.azurewebsites.net/api/auth", null)
-                           .ConfigureAwait(false)
-                           .GetAwaiter()
-                           .GetResult();
+            _httpClientWrapper = new HttpClientWrapper();
+            _webSocketClient = new WebSocketClient();
 
-                var jwtToken = response.Content.ReadAsStringAsync()
-                           .ConfigureAwait(false)
-                           .GetAwaiter()
-                           .GetResult();
+            var token = _httpClientWrapper.GetAuthorizationToken().ConfigureAwait(false).GetAwaiter().GetResult();
 
-                _clientSocket = new ClientWebSocket();
-                _clientSocket.Options.SetRequestHeader("Authorization", jwtToken);
-                _clientSocket.ConnectAsync(new Uri("ws://video-chat-sharp.azurewebsites.net"), CancellationToken.None)
-                    .ConfigureAwait(false)
-                    .GetAwaiter()
-                    .GetResult();
-
-                OnDataReceive += DataRecive;
-
-                //REFACTOR ME
-                Task.Run(Receive);
-                Task.Run(ProccesQueue);
-
-                //clientSocket.
-
-            }
+            _webSocketClient.Connect(token).ConfigureAwait(false).GetAwaiter().GetResult();
+            _webSocketClient.OnMessage += WebSocketClient_OnMessage;
 
             InitializeComponent();
             ConfigWebCams();
         }
 
-        private async Task Receive()
+        private void WebSocketClient_OnMessage(NetworkMessageReceivedEventArgs e)
         {
-            List<byte> receivedBytes = new List<byte>();
-
-            while (_clientSocket.State == WebSocketState.Open)
+            switch (e.PacketType)
             {
-                try
-                {
-                    byte[] tempStorage = new byte[2]; // 1016 is one chunck
-                    var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
+                case PacketTypeEnum.Video:
 
-                    receivedBytes.AddRange(tempStorage);
+                    VideoDecoder?.Decode(e.PacketPayload);
+                    break;
 
-                    if (result.EndOfMessage)
-                    {
-                        byte[] buffer = new byte[receivedBytes.Count];
-                        for (int i = 0; i < buffer.Length; i++)
-                            buffer[i] = receivedBytes[i];
-
-                        receivedBytes.Clear();
-
-                        using (var stream = new MemoryStream(buffer))
-                        using (var binaryReader = new BinaryReader(stream))
-                        {
-                            var packetTypeEnum = (PacketTypeEnum)binaryReader.ReadByte();
-                            var payloadLength = binaryReader.ReadInt32();
-                            var payload = binaryReader.ReadBytes(payloadLength);
-
-                            var packet = new Packet()
-                            {
-                                PayloadBuffer = payload,
-                                Type = packetTypeEnum
-                            };
-
-                            OnDataReceive?.Invoke(packet);
-                        }
-                    }
-
-                    //await Task.Delay(10);
-                }
-                catch (Exception ex)
-                {
-                    await _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                }
+                case PacketTypeEnum.Audio:
+                    OutputAudioDevice?.PlaySamples(e.PacketPayload, 60);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -184,13 +118,13 @@ namespace VideoChat.Desktop
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 _incomingFrameCount++;
-                VideoField.Source = ToBitmapImage(decodedImage);
+                VideoField.Source = decodedImage.ToBitmapImage();
             }));
         }
 
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            _concurrentQueue.Enqueue(new Packet()
+            _webSocketClient.SendPacket(new Packet()
             {
                 Type = PacketTypeEnum.Audio,
                 PayloadBuffer = e.Buffer
@@ -199,7 +133,7 @@ namespace VideoChat.Desktop
 
         private void VideoCodec_OnEncode(byte[] buffer)
         {
-            _concurrentQueue.Enqueue(new Packet()
+            _webSocketClient.SendPacket(new Packet()
             {
                 Type = PacketTypeEnum.Video,
                 PayloadBuffer = buffer
@@ -213,84 +147,11 @@ namespace VideoChat.Desktop
             VideoEncoder?.Encode(bitmap);
         }
 
-        private async Task ProccesQueue()
-        {
-            while (true)
-            {
-                _concurrentQueue.TryDequeue(out var packet);
-
-                if (packet == null)
-                    continue;
-
-                using (var stream = new MemoryStream())
-                {
-                    using (var binaryWriter = new BinaryWriter(stream))
-                    {
-                        var buffer = packet.PayloadBuffer.ToArray();
-
-                        binaryWriter.Write((byte)packet.Type);
-                        binaryWriter.Write(buffer.Length);
-                        binaryWriter.Write(buffer);
-
-                        _clientSocket.SendAsync(
-                                new ArraySegment<byte>(stream.ToArray()),
-                                WebSocketMessageType.Binary,
-                                true,
-                                CancellationToken.None)
-                                    .ConfigureAwait(false)
-                                    .GetAwaiter()
-                                    .GetResult();
-
-                    }
-                }
-
-                await Task.Delay(10);
-            }
-        }
-
-        private void DataRecive(Packet packet)
-        {
-            switch (packet.Type)
-            {
-                case PacketTypeEnum.Video:
-
-                    VideoDecoder?.Decode(packet.PayloadBuffer);
-                    break;
-
-                case PacketTypeEnum.Audio:
-                    var buffer = packet.PayloadBuffer;
-                    OutputAudioDevice?.PlaySamples(buffer, 60);
-
-                    break;
-                default:
-                    break;
-            }
-
-            //packet.PayloadStream.Dispose();
-        }
-
-        public static BitmapImage ToBitmapImage(Bitmap bitmap)
-        {
-            using (var memory = new MemoryStream())
-            {
-
-                bitmap.Save(memory, ImageFormat.Jpeg);
-                memory.Position = 0;
-
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-
-                return bitmapImage;
-            }
-        }
-
         private void Window_Closed(object sender, EventArgs e)
         {
-            _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+            _webSocketClient.Disconnect();
+            _webSocketClient.Dispose();
+            _httpClientWrapper.Dispose();
             VideoDeviceManager.CurrentDevice?.Stop();
             InputAudioDevice.Stop();
             OutputAudioDevice.Stop();
@@ -299,7 +160,7 @@ namespace VideoChat.Desktop
 
         private void MicroOnButton_Click(object sender, RoutedEventArgs e)
         {
-            InputAudioDevice.Start();        
+            InputAudioDevice.Start();
         }
 
         private void MicroOffButton_Click(object sender, RoutedEventArgs e)

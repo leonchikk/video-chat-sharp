@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
 using System.Text;
+using VideoChat.API.Middlewares;
 using VideoChat.API.Sockets;
 
 namespace VideoChat.API
@@ -49,7 +50,7 @@ namespace VideoChat.API
             app.UseAuthentication();
             app.UseMvc();
             app.UseWebSockets();
-            app.UseMiddleware<SocketMiddleware>();
+            app.UseMiddleware<ErrorHandlerMiddleware>();
         }
     }
 }
