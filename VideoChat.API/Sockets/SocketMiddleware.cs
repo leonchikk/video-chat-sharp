@@ -38,7 +38,7 @@ namespace VideoChat.API.Sockets
                 if (string.IsNullOrEmpty(accountId))
                     await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Forced termination", CancellationToken.None);
 
-                _connectionManager.HandleConnetion(accountId, socket);
+                _connectionManager.AddConnection(accountId, socket);
 
                 await _socketHandler.HandleIncomings(socket);
             }

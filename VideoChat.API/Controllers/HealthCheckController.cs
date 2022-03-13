@@ -17,7 +17,7 @@ namespace VideoChat.API.Controllers
         [HttpGet]
         public IActionResult HealthCheck()
         {
-            return Ok($"API is available. Current online : {_connectionManager.Connections.Count}");
+            return Ok($"API is available. Current online : {_connectionManager.UsersConnections.Count}");
         }
     }
 }

@@ -73,7 +73,7 @@ namespace VideoChat.API.Sockets
 
         private void HandleRequest(string accountId, byte[] buffer, WebSocket webSocket)
         {
-            var otherRecipentSockets = _connectionManager.Connections
+            var otherRecipentSockets = _connectionManager.UsersConnections
                 .Where(x => x.Key != accountId)
                 .Select(x => x.Value);
 
