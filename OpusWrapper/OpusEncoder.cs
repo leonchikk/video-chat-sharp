@@ -1,6 +1,6 @@
-﻿using System;
+﻿using FragLabs.Audio.Codecs.Opus;
+using System;
 using System.Collections.Generic;
-using FragLabs.Audio.Codecs.Opus;
 
 namespace FragLabs.Audio.Codecs
 {
@@ -163,7 +163,7 @@ namespace FragLabs.Audio.Codecs
                 int fec;
                 int ret = API.opus_encoder_ctl(_encoder, Ctl.GetInbandFECRequest, out fec);
                 if (ret < 0)
-                    throw new Exception("Encoder error - " + ((Errors) ret).ToString());
+                    throw new Exception("Encoder error - " + ((Errors)ret).ToString());
 
                 return fec > 0;
             }
@@ -175,7 +175,7 @@ namespace FragLabs.Audio.Codecs
 
                 var ret = API.opus_encoder_ctl(_encoder, Ctl.SetInbandFECRequest, value ? 1 : 0);
                 if (ret < 0)
-                    throw new Exception("Encoder error - " + ((Errors) ret).ToString());
+                    throw new Exception("Encoder error - " + ((Errors)ret).ToString());
             }
         }
 

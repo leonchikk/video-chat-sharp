@@ -66,7 +66,7 @@ namespace Multimedia.Audio.Desktop
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.NumberOfBuffers = 2;
             _audioPlayer.DesiredLatency = 100;
-            _audioPlayer.Init(_bufferedWaveProvider); 
+            _audioPlayer.Init(_bufferedWaveProvider);
             _isSetuped = true;
         }
 

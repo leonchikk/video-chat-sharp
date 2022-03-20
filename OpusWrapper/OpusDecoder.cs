@@ -1,5 +1,5 @@
-﻿using System;
-using FragLabs.Audio.Codecs.Opus;
+﻿using FragLabs.Audio.Codecs.Opus;
+using System;
 
 namespace FragLabs.Audio.Codecs
 {

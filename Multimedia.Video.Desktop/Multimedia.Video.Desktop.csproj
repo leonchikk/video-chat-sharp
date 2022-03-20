@@ -81,10 +81,6 @@
       <Project>{b4fe105e-c607-40dc-a86b-aed03e14d18d}</Project>
       <Name>OpenH264Lib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VideoChat.Core\VideoChat.Core.csproj">
-      <Project>{c0033c08-9619-4846-9038-ada945119daf}</Project>
-      <Name>VideoChat.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

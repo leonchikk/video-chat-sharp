@@ -45,8 +45,8 @@ namespace Networking
 
         public async Task Disconnect()
         {
-           await _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-           OnDisconnect?.Invoke();
+            await _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+            OnDisconnect?.Invoke();
         }
 
         public void SendPacket(Packet packet)
@@ -62,7 +62,7 @@ namespace Networking
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2]; 
+                    byte[] tempStorage = new byte[2];
                     var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
 
                     receivedBytes.AddRange(tempStorage);

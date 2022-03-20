@@ -1,8 +1,6 @@
 ﻿using FragLabs.Audio.Codecs;
-using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Multimedia.Audio.Desktop.Codecs
 {
