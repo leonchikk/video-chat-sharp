@@ -15,7 +15,7 @@ namespace VideoChat.API
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ConnectionManager>();
+            services.AddSingleton<ConnectionsManager>();
             services.AddSingleton<SocketHandler>();
             services.AddMvc(options => options.EnableEndpointRouting = false);
 

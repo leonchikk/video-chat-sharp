@@ -7,9 +7,9 @@ namespace VideoChat.API.Controllers
     [ApiController]
     public class HealthCheckController : ControllerBase
     {
-        private readonly ConnectionManager _connectionManager;
+        private readonly ConnectionsManager _connectionManager;
 
-        public HealthCheckController(ConnectionManager connectionManager)
+        public HealthCheckController(ConnectionsManager connectionManager)
         {
             _connectionManager = connectionManager;
         }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace VideoChat.API.Sockets
 {
-    public class ConnectionManager
+    public class ConnectionsManager
     {
         public ConcurrentDictionary<string, WebSocket> UsersConnections { get; private set; }
 
-        public ConnectionManager()
+        public ConnectionsManager()
         {
             UsersConnections = new ConcurrentDictionary<string, WebSocket>();
         }

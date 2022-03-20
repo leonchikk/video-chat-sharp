@@ -9,9 +9,9 @@ namespace VideoChat.API.Sockets
 {
     public class SocketHandler
     {
-        private readonly ConnectionManager _connectionManager;
+        private readonly ConnectionsManager _connectionManager;
 
-        public SocketHandler(ConnectionManager connectionManager)
+        public SocketHandler(ConnectionsManager connectionManager)
         {
             _connectionManager = connectionManager;
         }

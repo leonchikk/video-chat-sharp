@@ -10,12 +10,12 @@ namespace VideoChat.API.Sockets
     public class SocketMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ConnectionManager _connectionManager;
+        private readonly ConnectionsManager _connectionManager;
         private readonly SocketHandler _socketHandler;
         //private WebSocketHandler _webSocketHandler { get; set; }
 
         public SocketMiddleware(RequestDelegate next,
-            ConnectionManager connectionManager,
+            ConnectionsManager connectionManager,
             SocketHandler socketHandler)
         {
             _next = next;
