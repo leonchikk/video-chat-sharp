@@ -15,7 +15,6 @@ namespace Networking
     public class WebSocketClient : IWebSocketClient
     {
         //TODO: Move this to the settings
-        private readonly int _tickrate = 1000;
         private readonly string _url = "ws://video-chat-sharp.azurewebsites.net";
 
         private readonly ClientWebSocket _clientSocket;
@@ -79,17 +78,14 @@ namespace Networking
                         using (var binaryReader = new BinaryReader(stream))
                         {
                             var packetTypeEnum = (PacketTypeEnum)binaryReader.ReadByte();
-                            var payloadLength = binaryReader.ReadInt32();
-                            var payload = binaryReader.ReadBytes(payloadLength);
+                            var payload = binaryReader.ReadBytes(buffer.Length - 1); //Get rid of packet type byte
 
                             OnMessage?.Invoke(new NetworkMessageReceivedEventArgs(packetTypeEnum, payload));
                         }
                     }
-
-                    //await Task.Delay(1000 / _tickrate);
                 }
                 //TODO: Add logger
-                catch (Exception)
+                catch (Exception ex)
                 {
                     continue;
                 }
@@ -109,27 +105,12 @@ namespace Networking
                     if (packet == null)
                         continue;
 
-                    using (var stream = new MemoryStream())
-                    {
-                        using (var binaryWriter = new BinaryWriter(stream))
-                        {
-                            var buffer = packet.PayloadBuffer;
-
-                            binaryWriter.Write((byte)packet.Type);
-                            binaryWriter.Write(buffer.Length);
-                            binaryWriter.Write(buffer);
-
-                            //Note: websocket client cannot send simultaneously packets
-                            await _clientSocket.SendAsync(
-                                    new ArraySegment<byte>(stream.ToArray()),
-                                    WebSocketMessageType.Binary,
-                                    true,
-                                    CancellationToken.None);
-
-                        }
-                    }
-
-                    //await Task.Delay(1000 / _tickrate);
+                    //Note: websocket client cannot send simultaneously packets
+                    await _clientSocket.SendAsync(
+                            new ArraySegment<byte>(packet.Payload()),
+                            WebSocketMessageType.Binary,
+                            true,
+                            CancellationToken.None);
                 }
                 //TODO: Add logger
                 catch (Exception)

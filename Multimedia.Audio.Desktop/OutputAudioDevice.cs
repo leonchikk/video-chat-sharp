@@ -38,7 +38,7 @@ namespace Multimedia.Audio.Desktop
             }
         }
 
-        public void PlaySamples(byte[] buffer)
+        public void PlaySamples(byte[] buffer, bool containsSpeech = true)
         {
             //TODO: Add error event here
             if (!_isSetuped)
@@ -46,7 +46,12 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            var decoded = _codec.Decode(buffer, buffer.Length);
+            var decoded = new byte[2880]; /*((_audioPlayer.OutputWaveFormat.SampleRate / 1000) * _audioPlayer.DesiredLatency) * 2*/
+
+            if (containsSpeech)
+                decoded = _codec.Decode(buffer, buffer.Length);
+
+            //var decoded = _codec.Decode(buffer, buffer.Length);
 
             _bufferedWaveProvider?.AddSamples(decoded, 0, decoded.Length);
         }
@@ -59,11 +64,9 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(44100, 16, 1));
+            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
-            _audioPlayer.NumberOfBuffers = 2;
-            _audioPlayer.DesiredLatency = 100;
             _audioPlayer.Init(_bufferedWaveProvider);
             _isSetuped = true;
         }

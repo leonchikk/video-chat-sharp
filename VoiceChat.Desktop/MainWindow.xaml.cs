@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Networking.Factories;
+using System;
 using System.Windows;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Models;
@@ -37,7 +38,8 @@ namespace VoiceChat.Desktop
             switch (e.PacketType)
             {
                 case PacketTypeEnum.Audio:
-                    _outputAudioDevice?.PlaySamples(e.PacketPayload);
+                    var audioPacket = e.PacketPayload.ToAudioPacket();
+                    _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.ContainsSpeech);
                     break;
                 default:
                     break;
@@ -46,7 +48,7 @@ namespace VoiceChat.Desktop
 
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            _webSocketClient.SendPacket(new Packet(PacketTypeEnum.Audio, e.Buffer));
+            _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, e.Buffer));
         }
 
         private void Window_Closed(object sender, EventArgs e)

@@ -46,10 +46,9 @@ namespace Multimedia.Audio.Desktop
 
             _audioRecorder = new WaveIn(WaveCallbackInfo.FunctionCallback());
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
-            _audioRecorder.WaveFormat = new WaveFormat(44100, 16, 1);
+            _audioRecorder.WaveFormat = new WaveFormat(48000, 16, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
-            _audioRecorder.BufferMilliseconds = 100;
-            _audioRecorder.NumberOfBuffers = 2;
+            _audioRecorder.BufferMilliseconds = 30;
 
             _isSetuped = true;
         }
@@ -59,14 +58,13 @@ namespace Multimedia.Audio.Desktop
             short[] buffer = new short[e.BytesRecorded / 2];
             Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
 
-            if (buffer.All(x => IsSilence(x, 43)))
-                return;
+            var containsSpeech = !buffer.All(x => IsSilence(x, 40));
 
             var samples = _codec.Encode(e.Buffer, 0, e.BytesRecorded);
 
             foreach (var sample in samples)
             {
-                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length, true));
+                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length, containsSpeech));
             }
         }
 
