@@ -8,8 +8,11 @@ using VideoChat.Core.Multimedia;
 using VideoChat.Core.Networking;
 using VideoChat.Core.Packets;
 
-namespace VideoChat.Desktop
+namespace VoiceChat.Desktop
 {
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
     public partial class MainWindow : Window
     {
         public IInputAudioDevice InputAudioDevice;
