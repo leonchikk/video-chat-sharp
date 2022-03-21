@@ -9,7 +9,7 @@ namespace VideoChat.Core.Multimedia
     {
         IEnumerable<AudioDeviceOptions> Options { get; }
         void SwitchTo(AudioDeviceOptions options);
-        Task PlaySamples(byte[] buffer, int desireLatency);
+        void PlaySamples(byte[] buffer);
         void Start();
         void Stop();
     }

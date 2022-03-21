@@ -1,6 +1,4 @@
-﻿using Multimedia.Audio.Desktop;
-using Networking;
-using System;
+﻿using System;
 using System.Windows;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Models;
@@ -10,29 +8,28 @@ using VideoChat.Core.Packets;
 
 namespace VoiceChat.Desktop
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        public IInputAudioDevice InputAudioDevice;
-        public IOutputAudioDevice OutputAudioDevice;
-
+        private IInputAudioDevice _inputAudioDevice;
+        private IOutputAudioDevice _outputAudioDevice;
         private IWebSocketClient _webSocketClient;
         private IHttpClientWrapper _httpClientWrapper;
 
-        public MainWindow()
+        public MainWindow(
+            IInputAudioDevice inputAudioDevice,
+            IOutputAudioDevice outputAudioDevice,
+            IWebSocketClient webSocketClient,
+            IHttpClientWrapper httpClientWrapper)
         {
-            _httpClientWrapper = new HttpClientWrapper();
-            _webSocketClient = new WebSocketClient();
+            _inputAudioDevice = inputAudioDevice;
+            _outputAudioDevice = outputAudioDevice;
+            _webSocketClient = webSocketClient;
+            _httpClientWrapper = httpClientWrapper;
 
-            var token = _httpClientWrapper.GetAuthorizationToken().ConfigureAwait(false).GetAwaiter().GetResult();
-
-            _webSocketClient.Connect(token).ConfigureAwait(false).GetAwaiter().GetResult();
             _webSocketClient.OnMessage += WebSocketClient_OnMessage;
+            _inputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
 
             InitializeComponent();
-            ConfigWebCams();
         }
 
         private void WebSocketClient_OnMessage(NetworkMessageReceivedEventArgs e)
@@ -40,28 +37,16 @@ namespace VoiceChat.Desktop
             switch (e.PacketType)
             {
                 case PacketTypeEnum.Audio:
-                    OutputAudioDevice?.PlaySamples(e.PacketPayload, 60);
+                    _outputAudioDevice?.PlaySamples(e.PacketPayload);
                     break;
                 default:
                     break;
             }
         }
 
-        public void ConfigWebCams()
-        {
-            InputAudioDevice = new InputAudioDevice();
-            OutputAudioDevice = new OutputAudioDevice();
-
-            InputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
-            OutputAudioDevice.Start();
-        }
         private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            _webSocketClient.SendPacket(new Packet()
-            {
-                Type = PacketTypeEnum.Audio,
-                PayloadBuffer = e.Buffer
-            });
+            _webSocketClient.SendPacket(new Packet(PacketTypeEnum.Audio, e.Buffer));
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -69,18 +54,27 @@ namespace VoiceChat.Desktop
             _webSocketClient.Disconnect();
             _webSocketClient.Dispose();
             _httpClientWrapper.Dispose();
-            InputAudioDevice.Stop();
-            OutputAudioDevice.Stop();
+            _inputAudioDevice.Stop();
+            _outputAudioDevice.Stop();
         }
 
         private void MicroOnButton_Click(object sender, RoutedEventArgs e)
         {
-            InputAudioDevice.Start();
+            _inputAudioDevice.Start();
         }
 
         private void MicroOffButton_Click(object sender, RoutedEventArgs e)
         {
-            InputAudioDevice.Stop();
+            _inputAudioDevice.Stop();
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var token = await _httpClientWrapper.GetAuthorizationToken();
+
+            await _webSocketClient.Connect(token);
+
+            _outputAudioDevice.Start();
         }
     }
 }

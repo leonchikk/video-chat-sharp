@@ -1,9 +1,7 @@
 ﻿using Multimedia.Audio.Desktop.Codecs;
-using Multimedia.Audio.Desktop.Sound;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
@@ -68,7 +66,7 @@ namespace Multimedia.Audio.Desktop
 
             foreach (var sample in samples)
             {
-                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length));
+                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length, true));
             }
         }
 

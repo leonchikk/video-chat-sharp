@@ -38,15 +38,13 @@ namespace Multimedia.Audio.Desktop
             }
         }
 
-        public async Task PlaySamples(byte[] buffer, int desireLatency)
+        public void PlaySamples(byte[] buffer)
         {
             //TODO: Add error event here
             if (!_isSetuped)
             {
                 return;
             }
-
-            //await Task.Delay(desireLatency);
 
             var decoded = _codec.Decode(buffer, buffer.Length);
 

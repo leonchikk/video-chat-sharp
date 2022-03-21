@@ -8,4 +8,8 @@
     <ProjectReference Include="..\VideoChat.Core\VideoChat.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pipeline\" />
+  </ItemGroup>
+
 </Project>
