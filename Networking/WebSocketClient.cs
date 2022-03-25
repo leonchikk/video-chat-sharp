@@ -61,7 +61,7 @@ namespace Networking
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2];
+                    byte[] tempStorage = new byte[480];
                     var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
 
                     receivedBytes.AddRange(tempStorage);
