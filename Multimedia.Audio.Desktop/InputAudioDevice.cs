@@ -1,10 +1,14 @@
 ﻿using Multimedia.Audio.Desktop.Codecs;
 using NAudio.Wave;
+using RNNoiseWrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using VideoChat.Core.Codec;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
+using WebRtcVadSharp;
 
 namespace Multimedia.Audio.Desktop
 {
@@ -14,10 +18,17 @@ namespace Multimedia.Audio.Desktop
         private WaveIn _audioRecorder;
         private bool _isSetuped = false;
         private bool _disposed = false;
-        private OpusAudioCodec _codec;
+        private IAudioEncoder _encoder;
+        private INoiseReducer _noiseReducer;
 
-        public InputAudioDevice()
+        private const int BufferSize = 1024;
+        private readonly byte[] _buffer = new byte[BufferSize];
+
+        public InputAudioDevice(INoiseReducer noiseReducer, IAudioEncoder encoder)
         {
+            _encoder = encoder;
+            _noiseReducer = noiseReducer;
+
             Setup();
         }
 
@@ -55,16 +66,20 @@ namespace Multimedia.Audio.Desktop
 
         private void RecorderOnDataAvailable(object sender, WaveInEventArgs e)
         {
-            short[] buffer = new short[e.BytesRecorded / 2];
-            Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
+            var toDenoise = MemoryMarshal.Cast<byte, short>(e.Buffer);
 
-            var containsSpeech = !buffer.All(x => IsSilence(x, 40));
-
-            var samples = _codec.Encode(e.Buffer, 0, e.BytesRecorded);
-
-            foreach (var sample in samples)
+            for (int i = 0; i < toDenoise.Length; i += 480)
             {
-                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(sample, sample.Length, containsSpeech));
+                var splittedSample = new short[480];
+                Array.Copy(toDenoise.ToArray(), i, splittedSample, 0, 480);
+
+                _noiseReducer.ReduceNoise(splittedSample, 0);
+
+                var encodedLength = _encoder.Encode(splittedSample, _buffer);
+                var encoded = new byte[encodedLength];
+                Array.Copy(_buffer, encoded, encodedLength);
+
+                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(encoded, encoded.Length, true));
             }
         }
 
@@ -101,8 +116,6 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _codec = new OpusAudioCodec();
-
             SwitchTo(Options.First());
         }
 
@@ -110,6 +123,13 @@ namespace Multimedia.Audio.Desktop
         {
             double dB = 20 * Math.Log10(Math.Abs(amplitude));
             return dB < threshold;
+        }
+
+        private bool DoesFrameContainSpeech(byte[] audioFrame)
+        {
+            using var vad = new WebRtcVad();
+            vad.OperatingMode = OperatingMode.VeryAggressive;
+            return vad.HasSpeech(audioFrame, WebRtcVadSharp.SampleRate.Is48kHz, FrameLength.Is30ms);
         }
     }
 }

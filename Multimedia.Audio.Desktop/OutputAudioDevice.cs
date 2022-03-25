@@ -3,7 +3,9 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using VideoChat.Core.Codec;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 
@@ -16,11 +18,12 @@ namespace Multimedia.Audio.Desktop
         private BufferedWaveProvider _bufferedWaveProvider;
         private bool _isSetuped = false;
         private bool _disposed = false;
-        private OpusAudioCodec _codec;
+        private IAudioDecoder _decoder;
+        private short[] _pcmBuffer = new short[480];
 
-        public OutputAudioDevice()
+        public OutputAudioDevice(IAudioDecoder decoder)
         {
-            _codec = new OpusAudioCodec();
+            _decoder = decoder;
 
             SwitchTo(Options?.First());
         }
@@ -38,7 +41,7 @@ namespace Multimedia.Audio.Desktop
             }
         }
 
-        public void PlaySamples(byte[] buffer, bool containsSpeech = true)
+        public void PlaySamples(byte[] buffer, int length, bool containsSpeech = true)
         {
             //TODO: Add error event here
             if (!_isSetuped)
@@ -46,14 +49,10 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            var decoded = new byte[2880]; /*((_audioPlayer.OutputWaveFormat.SampleRate / 1000) * _audioPlayer.DesiredLatency) * 2*/
+            var decodedLength = _decoder.Decode(buffer, length, _pcmBuffer);
+            var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmBuffer)).ToArray();
 
-            if (containsSpeech)
-                decoded = _codec.Decode(buffer, buffer.Length);
-
-            //var decoded = _codec.Decode(buffer, buffer.Length);
-
-            _bufferedWaveProvider?.AddSamples(decoded, 0, decoded.Length);
+            _bufferedWaveProvider?.AddSamples(decodedSamples, 0, decodedSamples.Length);
         }
 
         public void SwitchTo(AudioDeviceOptions capability)
@@ -68,6 +67,8 @@ namespace Multimedia.Audio.Desktop
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider);
+            _audioPlayer.DesiredLatency = 0;
+            _audioPlayer.Volume = 1.0f;
             _isSetuped = true;
         }
 

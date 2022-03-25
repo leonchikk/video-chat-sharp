@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Multimedia.Audio.Desktop.Extensions;
 using Networking.Extensions;
+using RNNoiseWrapper.Extensions;
 using System.Windows;
 
 namespace VoiceChat.Desktop
@@ -24,6 +25,8 @@ namespace VoiceChat.Desktop
             services.AddSingleton<MainWindow>();
             services.AddNetworkInfrastructure();
             services.AddAudioInputOutputDevices();
+            services.AddOpusCodec();
+            services.AddNoiseReducer();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)

@@ -6,11 +6,9 @@
         xmlns:local="clr-namespace:VoiceChat.Desktop"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" HorizontalAlignment="Left" Margin="611,17,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="699,17,0,0" VerticalAlignment="Top" Width="75"/>
-        <Label Name="FPS" HorizontalAlignment="Left" Margin="729,17,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
-        <Label x:Name="FPS_Incoming" HorizontalAlignment="Left" Margin="291,102,0,0" VerticalAlignment="Top" Height="33" Width="45" Foreground="Black"/>
+        Title="MadJuns" Height="200" Width="244">
+    <Grid Margin="0,0,10,0">
+        <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" Margin="28,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
+        <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="116,20,0,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>

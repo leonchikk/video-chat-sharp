@@ -1,5 +1,7 @@
 ﻿using Networking.Factories;
 using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using System.Windows;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Models;
@@ -39,7 +41,7 @@ namespace VoiceChat.Desktop
             {
                 case PacketTypeEnum.Audio:
                     var audioPacket = e.PacketPayload.ToAudioPacket();
-                    _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.ContainsSpeech);
+                    _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
                     break;
                 default:
                     break;

@@ -8,7 +8,7 @@ namespace VideoChat.Core.Multimedia
     {
         IEnumerable<AudioDeviceOptions> Options { get; }
         void SwitchTo(AudioDeviceOptions options);
-        void PlaySamples(byte[] buffer, bool containsSpeech = true);
+        void PlaySamples(byte[] buffer, int length, bool containsSpeech = true);
         void Start();
         void Stop();
     }
