@@ -18,25 +18,19 @@ namespace VideoChat.API.Sockets
 
         public async Task HandleIncomings(WebSocket socket)
         {
-            List<byte> receivedBytes = new List<byte>();
             var accountId = _connectionManager.GetAccountId(socket);
 
             while (socket.State == WebSocketState.Open)
             {
                 try
                 {
-                    byte[] tempStorage = new byte[2]; // 1016 is one chunck
-                    var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
-
-                    receivedBytes.AddRange(tempStorage);
+                    byte[] receivedBuffer = new byte[4096]; 
+                    var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(receivedBuffer), cancellationToken: CancellationToken.None);
 
                     if (result.EndOfMessage)
                     {
-                        byte[] buffer = new byte[receivedBytes.Count];
-                        for (int i = 0; i < buffer.Length; i++)
-                            buffer[i] = receivedBytes[i];
-
-                        receivedBytes.Clear();
+                        byte[] buffer = new byte[result.Count];
+                        Buffer.BlockCopy(receivedBuffer, 0, buffer, 0, result.Count);
 
                         //Send received data to other users
                         HandleRequest(accountId, buffer, socket);

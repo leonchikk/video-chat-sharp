@@ -50,6 +50,7 @@ namespace VideoChat.API
             app.UseAuthentication();
             app.UseMvc();
             app.UseWebSockets();
+            app.UseMiddleware<SocketMiddleware>();
             app.UseMiddleware<ErrorHandlerMiddleware>();
         }
     }
