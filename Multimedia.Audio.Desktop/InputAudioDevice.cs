@@ -59,7 +59,8 @@ namespace Multimedia.Audio.Desktop
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
             _audioRecorder.WaveFormat = new WaveFormat(48000, 16, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
-            _audioRecorder.BufferMilliseconds = 30;
+            _audioRecorder.BufferMilliseconds = 100;
+            _audioRecorder.NumberOfBuffers = 3;
 
             _isSetuped = true;
         }

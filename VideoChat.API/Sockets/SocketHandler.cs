@@ -33,8 +33,7 @@ namespace VideoChat.API.Sockets
                         Buffer.BlockCopy(receivedBuffer, 0, buffer, 0, result.Count);
 
                         //Send received data to other users
-                        HandleRequest(accountId, buffer, socket);
-
+                        _ = HandleRequest(accountId, buffer, socket);
                     }
                 }
                 catch (Exception ex)
@@ -46,17 +45,17 @@ namespace VideoChat.API.Sockets
             await _connectionManager.CloseConnection(accountId);
         }
 
-        private async Task SendAsync(WebSocket socket, ArraySegment<byte> buffer, WebSocketMessageType socketMessageType = WebSocketMessageType.Text)
+        private async Task SendAsync(WebSocket socket, ArraySegment<byte> buffer, CancellationToken cancellationToken, WebSocketMessageType socketMessageType = WebSocketMessageType.Text)
         {
             if (socket == null || socket.State != WebSocketState.Open)
                 return;
 
             try
             {
-                await socket.SendAsync(buffer: buffer,
+                _ = socket.SendAsync(buffer: buffer,
                        messageType: socketMessageType,
                        endOfMessage: true,
-                       cancellationToken: CancellationToken.None);
+                       cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
@@ -65,7 +64,7 @@ namespace VideoChat.API.Sockets
             }
         }
 
-        private void HandleRequest(string accountId, byte[] buffer, WebSocket webSocket)
+        private async Task HandleRequest(string accountId, byte[] buffer, WebSocket webSocket)
         {
             var otherRecipentSockets = _connectionManager.UsersConnections
                 .Where(x => x.Key != accountId)
@@ -73,7 +72,10 @@ namespace VideoChat.API.Sockets
 
             foreach (var recipientSocket in otherRecipentSockets)
             {
-               _ = SendAsync(recipientSocket, buffer, WebSocketMessageType.Binary);
+                var timeOutToken = new CancellationTokenSource();
+                timeOutToken.CancelAfter(5);
+
+                _ = SendAsync(recipientSocket, buffer, timeOutToken.Token, WebSocketMessageType.Binary);
             }
         }
     }

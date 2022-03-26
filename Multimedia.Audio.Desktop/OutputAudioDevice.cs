@@ -52,9 +52,6 @@ namespace Multimedia.Audio.Desktop
             var decodedLength = _decoder.Decode(buffer, length, _pcmBuffer);
             var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmBuffer)).ToArray();
 
-            if (_bufferedWaveProvider.BufferedDuration.Milliseconds > 30)
-                _bufferedWaveProvider.ClearBuffer();
-
             _bufferedWaveProvider?.AddSamples(decodedSamples, 0, decodedSamples.Length);
         }
 
@@ -67,10 +64,11 @@ namespace Multimedia.Audio.Desktop
             }
 
             _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
+            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(1000);
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider);
-            _audioPlayer.DesiredLatency = 30;
+            _audioPlayer.DesiredLatency = 0;
             _audioPlayer.Volume = 1.0f;
             _isSetuped = true;
         }

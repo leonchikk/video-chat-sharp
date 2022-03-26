@@ -97,12 +97,15 @@ namespace Networking
                     if (packet == null)
                         continue;
 
+                    var timeOutToken = new CancellationTokenSource();
+                    timeOutToken.CancelAfter(5);
+
                     //Note: websocket client cannot send simultaneously packets
                     await _clientSocket.SendAsync(
                             new ArraySegment<byte>(packet.Payload()),
                             WebSocketMessageType.Binary,
                             true,
-                            CancellationToken.None);
+                            timeOutToken.Token);
                 }
                 //TODO: Add logger
                 catch (Exception)
