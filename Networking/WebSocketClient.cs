@@ -55,33 +55,25 @@ namespace Networking
 
         private async Task ReceivePacketsJob()
         {
-            List<byte> receivedBytes = new List<byte>();
+            //List<byte> receivedBytes = new List<byte>();
 
             while (_clientSocket.State == WebSocketState.Open)
             {
                 try
                 {
-                    byte[] tempStorage = new byte[480];
-                    var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(tempStorage), cancellationToken: CancellationToken.None);
-
-                    receivedBytes.AddRange(tempStorage);
+                    byte[] receivedStorage = new byte[4096];
+                    var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(receivedStorage), cancellationToken: CancellationToken.None);
 
                     if (result.EndOfMessage)
                     {
-                        byte[] buffer = new byte[receivedBytes.Count];
-                        for (int i = 0; i < buffer.Length; i++)
-                            buffer[i] = receivedBytes[i];
+                        byte[] buffer = new byte[result.Count];
+                        Buffer.BlockCopy(receivedStorage, 0, buffer, 0, result.Count);
 
-                        receivedBytes.Clear();
+                        var packetTypeEnum = (PacketTypeEnum) buffer[0];
+                        var payload = new byte[buffer.Length - 1]; //Get rid of packet type byte
+                        Buffer.BlockCopy(buffer, 1, payload, 0, payload.Length);
 
-                        using (var stream = new MemoryStream(buffer))
-                        using (var binaryReader = new BinaryReader(stream))
-                        {
-                            var packetTypeEnum = (PacketTypeEnum)binaryReader.ReadByte();
-                            var payload = binaryReader.ReadBytes(buffer.Length - 1); //Get rid of packet type byte
-
-                            OnMessage?.Invoke(new NetworkMessageReceivedEventArgs(packetTypeEnum, payload));
-                        }
+                        OnMessage?.Invoke(new NetworkMessageReceivedEventArgs(packetTypeEnum, payload));
                     }
                 }
                 //TODO: Add logger
