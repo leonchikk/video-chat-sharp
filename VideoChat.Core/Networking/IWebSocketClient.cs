@@ -11,7 +11,7 @@ namespace VideoChat.Core.Networking
         event Action OnConnection;
         event Action OnDisconnect;
 
-        void SendPacket(Packet packet);
+        Task SendPacket(Packet packet);
 
         Task Connect(string jwtToken);
         Task Disconnect();

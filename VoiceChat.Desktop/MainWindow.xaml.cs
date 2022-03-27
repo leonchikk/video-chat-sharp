@@ -48,9 +48,9 @@ namespace VoiceChat.Desktop
             }
         }
 
-        private void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
+        private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, e.Buffer));
+            await _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, e.Buffer));
         }
 
         private void Window_Closed(object sender, EventArgs e)

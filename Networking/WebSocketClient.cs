@@ -18,7 +18,6 @@ namespace Networking
         private readonly string _url = "ws://video-chat-sharp.azurewebsites.net";
 
         private readonly ClientWebSocket _clientSocket;
-        private readonly ConcurrentQueue<Packet> _packetsToSendQueue;
 
         public event Action<NetworkMessageReceivedEventArgs> OnMessage;
         public event Action OnConnection;
@@ -27,7 +26,6 @@ namespace Networking
         public WebSocketClient()
         {
             _clientSocket = new ClientWebSocket();
-            _packetsToSendQueue = new ConcurrentQueue<Packet>();
         }
 
         public async Task Connect(string jwtToken)
@@ -37,7 +35,6 @@ namespace Networking
             await _clientSocket.ConnectAsync(new Uri(_url), CancellationToken.None).ConfigureAwait(false);
 
             _ = Task.Run(ReceivePacketsJob).ConfigureAwait(false);
-            _ = Task.Run(ProccesPacketsToSendQueueJob).ConfigureAwait(false);
 
             OnConnection?.Invoke();
         }
@@ -48,9 +45,22 @@ namespace Networking
             OnDisconnect?.Invoke();
         }
 
-        public void SendPacket(Packet packet)
+        public async Task SendPacket(Packet packet)
         {
-            _packetsToSendQueue.Enqueue(packet);
+            try 
+            { 
+                //Note: websocket client cannot send simultaneously packets
+                await _clientSocket.SendAsync(
+                        new ArraySegment<byte>(packet.Payload()),
+                        WebSocketMessageType.Binary,
+                        true,
+                        CancellationToken.None);
+            }
+            //TODO: Add logger
+            catch (Exception)
+            {
+               
+            }
         }
 
         private async Task ReceivePacketsJob()
@@ -83,32 +93,6 @@ namespace Networking
             }
 
             await _clientSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-        }
-
-        private async Task ProccesPacketsToSendQueueJob()
-        {
-            while (_clientSocket.State == WebSocketState.Open)
-            {
-                try
-                {
-                    _packetsToSendQueue.TryDequeue(out var packet);
-
-                    if (packet == null)
-                        continue;
-
-                    //Note: websocket client cannot send simultaneously packets
-                    await _clientSocket.SendAsync(
-                            new ArraySegment<byte>(packet.Payload()),
-                            WebSocketMessageType.Binary,
-                            true,
-                            CancellationToken.None);
-                }
-                //TODO: Add logger
-                catch (Exception)
-                {
-                    continue;
-                }
-            }
         }
 
         public void Dispose()
