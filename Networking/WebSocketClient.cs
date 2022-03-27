@@ -55,13 +55,12 @@ namespace Networking
 
         private async Task ReceivePacketsJob()
         {
-            //List<byte> receivedBytes = new List<byte>();
+            byte[] receivedStorage = new byte[4096];
 
             while (_clientSocket.State == WebSocketState.Open)
             {
                 try
                 {
-                    byte[] receivedStorage = new byte[4096];
                     var result = await _clientSocket.ReceiveAsync(buffer: new ArraySegment<byte>(receivedStorage), cancellationToken: CancellationToken.None);
 
                     if (result.EndOfMessage)
@@ -97,15 +96,12 @@ namespace Networking
                     if (packet == null)
                         continue;
 
-                    var timeOutToken = new CancellationTokenSource();
-                    timeOutToken.CancelAfter(5);
-
                     //Note: websocket client cannot send simultaneously packets
                     await _clientSocket.SendAsync(
                             new ArraySegment<byte>(packet.Payload()),
                             WebSocketMessageType.Binary,
                             true,
-                            timeOutToken.Token);
+                            CancellationToken.None);
                 }
                 //TODO: Add logger
                 catch (Exception)

@@ -10,6 +10,7 @@ namespace VideoChat.API.Sockets
     public class SocketHandler
     {
         private readonly ConnectionsManager _connectionManager;
+        private byte[] _receivedBuffer = new byte[4096];
 
         public SocketHandler(ConnectionsManager connectionManager)
         {
@@ -24,13 +25,12 @@ namespace VideoChat.API.Sockets
             {
                 try
                 {
-                    byte[] receivedBuffer = new byte[4096]; 
-                    var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(receivedBuffer), cancellationToken: CancellationToken.None);
+                    var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(_receivedBuffer), cancellationToken: CancellationToken.None);
 
                     if (result.EndOfMessage)
                     {
                         byte[] buffer = new byte[result.Count];
-                        Buffer.BlockCopy(receivedBuffer, 0, buffer, 0, result.Count);
+                        Buffer.BlockCopy(_receivedBuffer, 0, buffer, 0, result.Count);
 
                         //Send received data to other users
                         _ = HandleRequest(accountId, buffer, socket);
@@ -38,11 +38,11 @@ namespace VideoChat.API.Sockets
                 }
                 catch (Exception ex)
                 {
-                    await _connectionManager.CloseConnection(socket);
+                    _ = _connectionManager.CloseConnection(socket);
                 }
             }
 
-            await _connectionManager.CloseConnection(accountId);
+            _ = _connectionManager.CloseConnection(accountId);
         }
 
         private async Task SendAsync(WebSocket socket, ArraySegment<byte> buffer, CancellationToken cancellationToken, WebSocketMessageType socketMessageType = WebSocketMessageType.Text)
@@ -60,7 +60,7 @@ namespace VideoChat.API.Sockets
             catch (Exception ex)
             {
                 var id = _connectionManager.GetAccountId(socket);
-                await _connectionManager.CloseConnection(id);
+                _ = _connectionManager.CloseConnection(id);
             }
         }
 
@@ -72,10 +72,7 @@ namespace VideoChat.API.Sockets
 
             foreach (var recipientSocket in otherRecipentSockets)
             {
-                var timeOutToken = new CancellationTokenSource();
-                timeOutToken.CancelAfter(5);
-
-                _ = SendAsync(recipientSocket, buffer, timeOutToken.Token, WebSocketMessageType.Binary);
+                _ = SendAsync(recipientSocket, buffer, CancellationToken.None, WebSocketMessageType.Binary);
             }
         }
     }

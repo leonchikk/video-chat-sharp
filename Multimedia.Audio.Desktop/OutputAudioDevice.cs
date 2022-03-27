@@ -1,10 +1,8 @@
-﻿using Multimedia.Audio.Desktop.Codecs;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using VideoChat.Core.Codec;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
@@ -64,7 +62,8 @@ namespace Multimedia.Audio.Desktop
             }
 
             _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
-            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(1000);
+            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(500);
+            _bufferedWaveProvider.DiscardOnBufferOverflow = true;
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider);
