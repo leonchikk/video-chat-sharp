@@ -6,9 +6,16 @@
         xmlns:local="clr-namespace:VoiceChat.Desktop"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="MadJuns" Height="200" Width="244">
-    <Grid Margin="0,0,10,0">
-        <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" Margin="28,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
-        <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" HorizontalAlignment="Left" Margin="116,20,0,0" VerticalAlignment="Top" Width="75"/>
+        Title="MadJuns" Height="180" Width="385">
+    <Grid Margin="0,0,4,0">
+        <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" Margin="204,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
+        <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" Margin="284,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
+        <Label Name="VolumeLabel" Content="Volume:" HorizontalAlignment="Left" Margin="8,14,0,0" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Value="1" Minimum="0" Maximum="1" Margin="61,20,0,0" VerticalAlignment="Top" Width="125" ValueChanged="Slider_ValueChanged"/>
+        <Label Content="Input:" HorizontalAlignment="Left" Margin="20,46,0,0" VerticalAlignment="Top"/>
+        <Label Content="Output:" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top"/>
+        <ComboBox SelectionChanged="InputDeviceDropdown_SelectionChanged" Name="InputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,50,0,0" VerticalAlignment="Top" Width="294"/>
+        <ComboBox SelectionChanged="OutputDeviceDropdown_SelectionChanged" Name="OutputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,76,0,0" VerticalAlignment="Top" Width="294"/>
+        <CheckBox IsChecked="False"  Name="EchoCancellationCheckBox" Content="Echo cancellation" Unchecked="EchoCancellationCheckBox_Unchecked" Checked="EchoCancellationCheckBox_Checked" HorizontalAlignment="Left" Margin="20,111,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

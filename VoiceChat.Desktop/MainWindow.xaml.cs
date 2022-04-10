@@ -1,13 +1,16 @@
 ﻿using Networking.Factories;
 using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using System.Windows;
 using VideoChat.Core.Enumerations;
 using VideoChat.Core.Models;
 using VideoChat.Core.Multimedia;
 using VideoChat.Core.Networking;
 using VideoChat.Core.Packets;
+using System.Linq;
+using VideoChat.Core.Codec;
+using System.Runtime.InteropServices;
+using SpeexEchoReducer;
+using SpeexPreprocessor;
 
 namespace VoiceChat.Desktop
 {
@@ -17,20 +20,45 @@ namespace VoiceChat.Desktop
         private IOutputAudioDevice _outputAudioDevice;
         private IWebSocketClient _webSocketClient;
         private IHttpClientWrapper _httpClientWrapper;
+        private IAudioEncoder _encoder;
+        private INoiseReducer _noiseReducer;
+
+        private EchoReducer _echoReducer;
+        private Preprocessor _preprocessor;
+
+        private readonly byte[] _encodedBuffer = new byte[1024];
+        private byte[] _echo_frame = new byte[960];
+
+        private bool _enableEchoCancellation = false;
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
             IOutputAudioDevice outputAudioDevice,
             IWebSocketClient webSocketClient,
-            IHttpClientWrapper httpClientWrapper)
+            IHttpClientWrapper httpClientWrapper,
+            INoiseReducer noiseReducer, 
+            IAudioEncoder encoder)
         {
             _inputAudioDevice = inputAudioDevice;
             _outputAudioDevice = outputAudioDevice;
             _webSocketClient = webSocketClient;
             _httpClientWrapper = httpClientWrapper;
+            _encoder = encoder;
+            _noiseReducer = noiseReducer;
+
+            _echoReducer = new EchoReducer(480, 48000);
+            _preprocessor = new Preprocessor(480, 48000);
+
+            _preprocessor.Denoise = true;
+            _preprocessor.Dereverb = true;
+            _preprocessor.Agc = true;
+            _preprocessor.AgcLevel = 2000;
+            _preprocessor.AgcMaxGain = 1000;
+            _preprocessor.AgcIncrement = 50;
+            _preprocessor.AgcDecrement = -50;
 
             _webSocketClient.OnMessage += WebSocketClient_OnMessage;
-            _inputAudioDevice.OnSampleRecorded += InputAudioDevice_OnSampleRecorded;
+            _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
 
             InitializeComponent();
         }
@@ -41,6 +69,9 @@ namespace VoiceChat.Desktop
             {
                 case PacketTypeEnum.Audio:
                     var audioPacket = e.PacketPayload.ToAudioPacket();
+
+                    Buffer.BlockCopy(audioPacket.Samples, 0, _echo_frame, 0, audioPacket.Samples.Length);
+
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
                     break;
                 default:
@@ -50,7 +81,24 @@ namespace VoiceChat.Desktop
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            await _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, e.Buffer));
+            var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
+            var output_frame = e.Buffer;
+
+            _noiseReducer.ReduceNoise(pcmInput, 0);
+
+            if (_enableEchoCancellation)
+                _echoReducer.EchoCancellation(pcmInput, _echo_frame, output_frame);
+
+            _preprocessor.Run(output_frame);
+
+            var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
+
+            var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
+            var encoded = new byte[encodedLength];
+
+            Array.Copy(_encodedBuffer, encoded, encodedLength);
+
+            await _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -79,6 +127,48 @@ namespace VoiceChat.Desktop
             await _webSocketClient.Connect(token);
 
             _outputAudioDevice.Start();
+
+            InputDeviceDropdown.ItemsSource = _inputAudioDevice.Options;
+            OutputDeviceDropdown.ItemsSource = _outputAudioDevice.Options;
+            InputDeviceDropdown.SelectedItem = _inputAudioDevice.SelectedOption;
+            OutputDeviceDropdown.SelectedItem = _outputAudioDevice.SelectedOption;
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            _outputAudioDevice.ChangeVolume(Convert.ToSingle(e.NewValue));
+        }
+
+        private void InputDeviceDropdown_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var selectedDevice = e.AddedItems.Count > 0 ? (e.AddedItems[0] as AudioDeviceOptions) : null;
+
+            if (selectedDevice == null || selectedDevice == _inputAudioDevice.SelectedOption)
+                return;
+
+            _inputAudioDevice.SwitchTo(selectedDevice);
+            _inputAudioDevice.Start();
+        }
+
+        private void OutputDeviceDropdown_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var selectedDevice = e.AddedItems.Count > 0 ? (e.AddedItems[0] as AudioDeviceOptions) : null;
+
+            if (selectedDevice == null || selectedDevice == _outputAudioDevice.SelectedOption)
+                return;
+
+            _outputAudioDevice.SwitchTo(selectedDevice);
+            _outputAudioDevice.Start();
+        }
+
+        private void EchoCancellationCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            _enableEchoCancellation = EchoCancellationCheckBox.IsChecked.Value;
+        }
+
+        private void EchoCancellationCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+             _enableEchoCancellation = EchoCancellationCheckBox.IsChecked.Value;
         }
     }
 }

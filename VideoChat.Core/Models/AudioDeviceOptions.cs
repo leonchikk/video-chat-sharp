@@ -12,5 +12,15 @@
         public int DeviceNumber { get; private set; }
         public int Channels { get; private set; }
         public string Name { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            return (obj as AudioDeviceOptions).DeviceNumber == DeviceNumber;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

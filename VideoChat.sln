@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoiceChat.Desktop", "VoiceC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpusWrapper", "RNNoiseWrapper\OpusWrapper.csproj", "{BC676570-70CF-4432-B584-5558D0D8C1BF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpeexPreprocessor", "SpeexPreprocessor\SpeexPreprocessor.vcxproj", "{72023C24-E520-42B1-8DBF-438CBFCA0D02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,17 @@ Global
 		{BC676570-70CF-4432-B584-5558D0D8C1BF}.Release|x64.Build.0 = Release|Any CPU
 		{BC676570-70CF-4432-B584-5558D0D8C1BF}.Release|x86.ActiveCfg = Release|Any CPU
 		{BC676570-70CF-4432-B584-5558D0D8C1BF}.Release|x86.Build.0 = Release|Any CPU
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|Any CPU.Build.0 = Debug|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|x64.ActiveCfg = Debug|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|x64.Build.0 = Debug|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|x86.ActiveCfg = Debug|Win32
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Debug|x86.Build.0 = Debug|Win32
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Release|Any CPU.ActiveCfg = Release|Win32
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Release|x64.ActiveCfg = Release|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Release|x64.Build.0 = Release|x64
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Release|x86.ActiveCfg = Release|Win32
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +137,7 @@ Global
 		{12B48C3D-D299-4F1C-8EEA-5DEFA1933BBB} = {6459BDBA-4348-41A5-933F-1CCDCC375AF1}
 		{E7EE8F6E-77BF-4C9F-99B7-F479B289A2C9} = {A02B0B27-797F-4619-AA80-CE0E62AC4A61}
 		{BC676570-70CF-4432-B584-5558D0D8C1BF} = {343C47DF-C380-4BDB-A8C3-2FE308CAC061}
+		{72023C24-E520-42B1-8DBF-438CBFCA0D02} = {343C47DF-C380-4BDB-A8C3-2FE308CAC061}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4025349E-3C95-45FA-97F8-E6DD65C3EAD5}

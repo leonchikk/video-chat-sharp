@@ -1,6 +1,7 @@
 ﻿using Multimedia.Audio.Desktop.Codecs;
 using NAudio.Wave;
 using RNNoiseWrapper;
+using SpeexPreprocessor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,16 +19,18 @@ namespace Multimedia.Audio.Desktop
         private WaveIn _audioRecorder;
         private bool _isSetuped = false;
         private bool _disposed = false;
-        private IAudioEncoder _encoder;
-        private INoiseReducer _noiseReducer;
+        private Preprocessor _preprocessor;
 
-        private const int BufferSize = 1024;
-        private readonly byte[] _buffer = new byte[BufferSize];
-
-        public InputAudioDevice(INoiseReducer noiseReducer, IAudioEncoder encoder)
+        public InputAudioDevice()
         {
-            _encoder = encoder;
-            _noiseReducer = noiseReducer;
+            _preprocessor = new Preprocessor(480, 48000);
+
+            _preprocessor.Denoise = true;
+            _preprocessor.Dereverb = true;
+            _preprocessor.Agc = false;
+            _preprocessor.AgcLevel = 8000;
+            _preprocessor.AgcMaxGain = 20;
+            _preprocessor.AgcIncrement = 5;
 
             Setup();
         }
@@ -45,7 +48,10 @@ namespace Multimedia.Audio.Desktop
             }
         }
 
-        public event Action<AudioSampleRecordedEventArgs> OnSampleRecorded;
+        private AudioDeviceOptions _selectedOption;
+        public AudioDeviceOptions SelectedOption => _selectedOption;
+
+        public event Action<AudioSampleRecordedEventArgs> OnSamplesRecorded;
 
         public void SwitchTo(AudioDeviceOptions capability)
         {
@@ -55,33 +61,19 @@ namespace Multimedia.Audio.Desktop
                 return;
             }
 
-            _audioRecorder = new WaveIn(WaveCallbackInfo.FunctionCallback());
+            _audioRecorder = new WaveIn();
             _audioRecorder.DataAvailable += RecorderOnDataAvailable;
             _audioRecorder.WaveFormat = new WaveFormat(48000, 16, 1);
             _audioRecorder.DeviceNumber = capability.DeviceNumber;
-            _audioRecorder.BufferMilliseconds = 100;
-            _audioRecorder.NumberOfBuffers = 3;
-
+            _audioRecorder.BufferMilliseconds = 10;
             _isSetuped = true;
+
+            _selectedOption = capability;
         }
 
         private void RecorderOnDataAvailable(object sender, WaveInEventArgs e)
         {
-            var toDenoise = MemoryMarshal.Cast<byte, short>(e.Buffer);
-
-            for (int i = 0; i < toDenoise.Length; i += 480)
-            {
-                var splittedSample = new short[480];
-                Array.Copy(toDenoise.ToArray(), i, splittedSample, 0, 480);
-
-                _noiseReducer.ReduceNoise(splittedSample, 0);
-
-                var encodedLength = _encoder.Encode(splittedSample, _buffer);
-                var encoded = new byte[encodedLength];
-                Array.Copy(_buffer, encoded, encodedLength);
-
-                OnSampleRecorded?.Invoke(new AudioSampleRecordedEventArgs(encoded, encoded.Length, true));
-            }
+            OnSamplesRecorded?.Invoke(new AudioSampleRecordedEventArgs(e.Buffer, e.BytesRecorded, true));
         }
 
         public void Start()

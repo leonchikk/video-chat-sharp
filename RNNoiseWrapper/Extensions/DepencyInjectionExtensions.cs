@@ -13,8 +13,8 @@ namespace RNNoiseWrapper.Extensions
             {
                 return new NoiseReducer(new NoiseReducerConfig()
                 {
-                    Attenuation = 60,
-                    Model = RnNoiseModel.Voice,
+                    Attenuation = 40,
+                    Model = RnNoiseModel.Speech,
                     NumChannels = (int)NumChannels.Mono,
                     SampleRate = (int)SampleRate._48000
                 });

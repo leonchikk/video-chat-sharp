@@ -39,6 +39,9 @@ namespace Multimedia.Audio.Desktop
             }
         }
 
+        private AudioDeviceOptions _selectedOption;
+        public AudioDeviceOptions SelectedOption => _selectedOption;
+
         public void PlaySamples(byte[] buffer, int length, bool containsSpeech = true)
         {
             //TODO: Add error event here
@@ -62,14 +65,16 @@ namespace Multimedia.Audio.Desktop
             }
 
             _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
-            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(500);
+            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(200);
             _bufferedWaveProvider.DiscardOnBufferOverflow = true;
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider);
-            _audioPlayer.DesiredLatency = 0;
             _audioPlayer.Volume = 1.0f;
+            _audioPlayer.DesiredLatency = 0;
             _isSetuped = true;
+
+            _selectedOption = capability;
         }
 
         public void Start()
@@ -96,6 +101,17 @@ namespace Multimedia.Audio.Desktop
             _disposed = true;
 
             _audioPlayer?.Dispose();
+        }
+
+        public void ChangeVolume(float volume)
+        {
+            //TODO: Add error event here
+            if (!_isSetuped)
+            {
+                return;
+            }
+
+            _audioPlayer.Volume = volume;
         }
     }
 }
