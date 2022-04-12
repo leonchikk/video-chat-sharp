@@ -43,6 +43,15 @@ void EchoReducer::EchoCapture(array<unsigned char>^ input_frame, array<unsigned 
 	speex_echo_capture(_state, (spx_int16_t*)input_frame_buffer, (spx_int16_t*)output_frame_buffer);
 }
 
+void EchoReducer::EchoCapture(array<short>^ input_frame, array<unsigned char>^ output_frame)
+{
+	pin_ptr<short> input_frame_buffer = &input_frame[0];
+	pin_ptr<unsigned char> output_frame_buffer = &output_frame[0];
+
+	speex_echo_capture(_state, input_frame_buffer, (spx_int16_t*)output_frame_buffer);
+}
+
+
 void EchoReducer::EchoPlayback(array<unsigned char>^ echo_frame)
 {
 	pin_ptr<unsigned char> echo_frame_buffer = &echo_frame[0];

@@ -17,5 +17,6 @@
         <ComboBox SelectionChanged="InputDeviceDropdown_SelectionChanged" Name="InputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,50,0,0" VerticalAlignment="Top" Width="294"/>
         <ComboBox SelectionChanged="OutputDeviceDropdown_SelectionChanged" Name="OutputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,76,0,0" VerticalAlignment="Top" Width="294"/>
         <CheckBox IsChecked="False"  Name="EchoCancellationCheckBox" Content="Echo cancellation" Unchecked="EchoCancellationCheckBox_Unchecked" Checked="EchoCancellationCheckBox_Checked" HorizontalAlignment="Left" Margin="20,111,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="True"  x:Name="AgcCheckBox" Content="Agc" Unchecked="AgcCheckBox_Unchecked" Checked="AgcCheckBox_Checked" HorizontalAlignment="Left" Margin="156,111,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

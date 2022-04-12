@@ -52,10 +52,10 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2000;
-            _preprocessor.AgcMaxGain = 1000;
-            _preprocessor.AgcIncrement = 50;
-            _preprocessor.AgcDecrement = -50;
+            _preprocessor.AgcLevel = 1000;
+            _preprocessor.AgcMaxGain = 100;
+            _preprocessor.AgcIncrement = 5;
+            _preprocessor.AgcDecrement = -5;
 
             _webSocketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -72,7 +72,13 @@ namespace VoiceChat.Desktop
 
                     Buffer.BlockCopy(audioPacket.Samples, 0, _echo_frame, 0, audioPacket.Samples.Length);
 
+                    //var output = new byte[960];
+                    //_echoReducer.EchoCapture(audioPacket.Samples, output);
+                    //_outputAudioDevice.PlaySamples(output, output.Length);
+
+
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
+
                     break;
                 default:
                     break;
@@ -84,14 +90,15 @@ namespace VoiceChat.Desktop
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
 
-            _noiseReducer.ReduceNoise(pcmInput, 0);
-
             if (_enableEchoCancellation)
                 _echoReducer.EchoCancellation(pcmInput, _echo_frame, output_frame);
 
+            //_echoReducer.EchoPlayback(output_frame);
             _preprocessor.Run(output_frame);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
+
+            _noiseReducer.ReduceNoise(pcmOutput, 0);
 
             var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
             var encoded = new byte[encodedLength];
@@ -169,6 +176,16 @@ namespace VoiceChat.Desktop
         private void EchoCancellationCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
              _enableEchoCancellation = EchoCancellationCheckBox.IsChecked.Value;
+        }
+
+        private void AgcCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _preprocessor.Agc = AgcCheckBox.IsChecked.Value;
+        }
+
+        private void AgcCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            _preprocessor.Agc = AgcCheckBox.IsChecked.Value;
         }
     }
 }

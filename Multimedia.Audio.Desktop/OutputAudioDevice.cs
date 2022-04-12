@@ -65,7 +65,7 @@ namespace Multimedia.Audio.Desktop
             }
 
             _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
-            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(200);
+            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(150);
             _bufferedWaveProvider.DiscardOnBufferOverflow = true;
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;

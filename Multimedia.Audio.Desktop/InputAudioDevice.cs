@@ -19,19 +19,9 @@ namespace Multimedia.Audio.Desktop
         private WaveIn _audioRecorder;
         private bool _isSetuped = false;
         private bool _disposed = false;
-        private Preprocessor _preprocessor;
 
         public InputAudioDevice()
         {
-            _preprocessor = new Preprocessor(480, 48000);
-
-            _preprocessor.Denoise = true;
-            _preprocessor.Dereverb = true;
-            _preprocessor.Agc = false;
-            _preprocessor.AgcLevel = 8000;
-            _preprocessor.AgcMaxGain = 20;
-            _preprocessor.AgcIncrement = 5;
-
             Setup();
         }
 
