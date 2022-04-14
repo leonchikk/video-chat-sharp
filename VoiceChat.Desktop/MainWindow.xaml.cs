@@ -27,9 +27,6 @@ namespace VoiceChat.Desktop
         private Preprocessor _preprocessor;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
-        private byte[] _echo_frame = new byte[960];
-
-        private bool _enableEchoCancellation = false;
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -49,7 +46,7 @@ namespace VoiceChat.Desktop
             _echoReducer = new EchoReducer(480, 48000);
             _preprocessor = new Preprocessor(480, 48000);
 
-            _preprocessor.Denoise = true;
+            _preprocessor.Denoise = false;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
             _preprocessor.AgcLevel = 2000;
@@ -70,14 +67,7 @@ namespace VoiceChat.Desktop
                 case PacketTypeEnum.Audio:
                     var audioPacket = e.PacketPayload.ToAudioPacket();
 
-                    Buffer.BlockCopy(audioPacket.Samples, 0, _echo_frame, 0, audioPacket.Samples.Length);
-
                     _echoReducer.EchoPlayback(audioPacket.Samples);
-
-                    //var output = new byte[960];
-                    //_echoReducer.EchoCapture(audioPacket.Samples, output);
-                    //_outputAudioDevice.PlaySamples(output, output.Length);
-
 
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
 
@@ -91,9 +81,6 @@ namespace VoiceChat.Desktop
         {
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
-
-            //if (_enableEchoCancellation)
-            //    _echoReducer.EchoCancellation(pcmInput, _echo_frame, output_frame);
 
             _echoReducer.EchoCapture(pcmInput, output_frame);
             _preprocessor.Run(output_frame);
@@ -168,26 +155,6 @@ namespace VoiceChat.Desktop
 
             _outputAudioDevice.SwitchTo(selectedDevice);
             _outputAudioDevice.Start();
-        }
-
-        private void EchoCancellationCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            _enableEchoCancellation = EchoCancellationCheckBox.IsChecked.Value;
-        }
-
-        private void EchoCancellationCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-             _enableEchoCancellation = EchoCancellationCheckBox.IsChecked.Value;
-        }
-
-        private void AgcCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            _preprocessor.Agc = AgcCheckBox.IsChecked.Value;
-        }
-
-        private void AgcCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            _preprocessor.Agc = AgcCheckBox.IsChecked.Value;
         }
     }
 }
