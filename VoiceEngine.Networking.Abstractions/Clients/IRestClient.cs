@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace VoiceEngine.Network.Abstractions.Clients
 {
-    public interface IHttpClientWrapper: IDisposable
+    public interface IRestClient: IDisposable
     {
         Task<string> GetAuthorizationToken();
     }

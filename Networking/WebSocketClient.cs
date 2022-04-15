@@ -9,7 +9,7 @@ using VoiceEngine.Network.Abstractions.Packets;
 
 namespace VoiceEngine.Network
 {
-    public class WebSocketClient : IWebSocketClient
+    public class WebSocketClient : ISocketClient
     {
         //TODO: Move this to the settings
         private readonly string _url = "ws://video-chat-sharp.azurewebsites.net";

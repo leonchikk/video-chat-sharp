@@ -1,5 +1,5 @@
 ﻿using System;
-using VoiceEngine.Abstractions.Multimedia;
+using VoiceEngine.Abstractions.Filters;
 
 namespace RNNoiseWrapper
 {

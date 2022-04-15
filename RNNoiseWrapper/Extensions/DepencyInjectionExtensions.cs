@@ -2,7 +2,7 @@
 using OpusWrapper;
 using VideoChat.Core.Codec;
 using VoiceEngine.Abstractions.Encoding;
-using VoiceEngine.Abstractions.Multimedia;
+using VoiceEngine.Abstractions.Filters;
 
 namespace RNNoiseWrapper.Extensions
 {

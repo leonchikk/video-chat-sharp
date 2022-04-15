@@ -5,7 +5,7 @@ using VoiceEngine.Network.Abstractions.Packets;
 
 namespace VoiceEngine.Network.Abstractions.Clients
 {
-    public interface IWebSocketClient: IDisposable
+    public interface ISocketClient: IDisposable
     {
         event Action<NetworkMessageReceivedEventArgs> OnMessage;
         event Action OnConnection;

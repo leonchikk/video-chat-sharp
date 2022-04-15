@@ -1,4 +1,4 @@
-﻿namespace VoiceEngine.Abstractions.Multimedia
+﻿namespace VoiceEngine.Abstractions.Filters
 {
     public interface INoiseReducer
     {

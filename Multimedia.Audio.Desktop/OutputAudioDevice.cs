@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using VoiceEngine.Abstractions.Encoding;
+using VoiceEngine.Abstractions.IO;
 using VoiceEngine.Abstractions.Models;
-using VoiceEngine.Abstractions.Multimedia;
 
-namespace Multimedia.Audio.Desktop
+namespace VoiceEngine.IO.Desktop
 {
     //TODO: Add OnError event
     public class OutputAudioDevice : IOutputAudioDevice

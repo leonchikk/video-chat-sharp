@@ -5,12 +5,12 @@ using VoiceEngine.Network.Abstractions.Clients;
 
 namespace VoiceEngine.Network
 {
-    public class HttpClientWrapper : IHttpClientWrapper
+    public class RestClient : IRestClient
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl = "https://video-chat-sharp.azurewebsites.net";
 
-        public HttpClientWrapper()
+        public RestClient()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(_baseUrl);

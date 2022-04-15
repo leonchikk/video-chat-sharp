@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using VoiceEngine.Abstractions.Multimedia;
+using VoiceEngine.Abstractions.IO;
 
-namespace Multimedia.Audio.Desktop.Extensions
+namespace VoiceEngine.IO.Desktop.Extensions
 {
     public static class DepencyInjectionExtensions
     {

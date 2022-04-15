@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Multimedia.Audio.Desktop\Multimedia.Audio.Desktop.csproj" />
+    <ProjectReference Include="..\Multimedia.Audio.Desktop\VoiceEngine.IO.Desktop.csproj" />
     <ProjectReference Include="..\Networking\VoiceEngine.Network.csproj" />
     <ProjectReference Include="..\RNNoiseWrapper\OpusWrapper.csproj" />
     <ProjectReference Include="..\VideoChat.Core\VoiceEngine.Abstractions.csproj" />

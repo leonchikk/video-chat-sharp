@@ -7,8 +7,8 @@ namespace VoiceEngine.Network.Extensions
     {
         public static IServiceCollection AddNetworkInfrastructure(this IServiceCollection services)
         {
-            services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
-            services.AddSingleton<IWebSocketClient, WebSocketClient>();
+            services.AddSingleton<IRestClient, RestClient>();
+            services.AddSingleton<ISocketClient, WebSocketClient>();
 
             return services;
         }

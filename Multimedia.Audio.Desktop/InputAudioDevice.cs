@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VoiceEngine.Abstractions.EventArgs;
+using VoiceEngine.Abstractions.IO;
 using VoiceEngine.Abstractions.Models;
-using VoiceEngine.Abstractions.Multimedia;
 using WebRtcVadSharp;
 
-namespace Multimedia.Audio.Desktop
+namespace VoiceEngine.IO.Desktop
 {
     //TODO: Add OnError event
     public class InputAudioDevice : IInputAudioDevice

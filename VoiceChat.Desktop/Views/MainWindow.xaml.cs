@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using VideoChat.Core.Codec;
 using VoiceEngine.Abstractions.EventArgs;
+using VoiceEngine.Abstractions.Filters;
+using VoiceEngine.Abstractions.IO;
 using VoiceEngine.Abstractions.Models;
-using VoiceEngine.Abstractions.Multimedia;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.Clients;
 using VoiceEngine.Network.Abstractions.EventArgs;
@@ -19,8 +20,8 @@ namespace VoiceChat.Desktop
     {
         private IInputAudioDevice _inputAudioDevice;
         private IOutputAudioDevice _outputAudioDevice;
-        private IWebSocketClient _webSocketClient;
-        private IHttpClientWrapper _httpClientWrapper;
+        private ISocketClient _webSocketClient;
+        private IRestClient _httpClientWrapper;
         private IAudioEncoder _encoder;
         private INoiseReducer _noiseReducer;
 
@@ -32,8 +33,8 @@ namespace VoiceChat.Desktop
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
             IOutputAudioDevice outputAudioDevice,
-            IWebSocketClient webSocketClient,
-            IHttpClientWrapper httpClientWrapper,
+            ISocketClient webSocketClient,
+            IRestClient httpClientWrapper,
             INoiseReducer noiseReducer,
             IAudioEncoder encoder)
         {
