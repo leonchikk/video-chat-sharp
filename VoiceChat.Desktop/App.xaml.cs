@@ -23,6 +23,7 @@ namespace VoiceChat.Desktop
         private void ConfigureServices(ServiceCollection services)
         {
             services.AddSingleton<MainWindow>();
+            services.AddSingleton<Views.SplashScreen>();
             services.AddNetworkInfrastructure();
             services.AddAudioInputOutputDevices();
             services.AddOpusCodec();
@@ -31,7 +32,7 @@ namespace VoiceChat.Desktop
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var mainWindow = serviceProvider.GetService<MainWindow>();
+            var mainWindow = serviceProvider.GetService<Views.SplashScreen>();
             mainWindow.Show();
         }
     }
