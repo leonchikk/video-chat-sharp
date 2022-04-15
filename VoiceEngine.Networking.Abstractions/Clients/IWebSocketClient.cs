@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using VideoChat.Core.Models;
-using VideoChat.Core.Packets;
+using VoiceEngine.Network.Abstractions.EventArgs;
+using VoiceEngine.Network.Abstractions.Packets;
 
-namespace VideoChat.Core.Networking
+namespace VoiceEngine.Network.Abstractions.Clients
 {
     public interface IWebSocketClient: IDisposable
     {

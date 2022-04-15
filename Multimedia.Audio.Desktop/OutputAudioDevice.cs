@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using VideoChat.Core.Codec;
-using VideoChat.Core.Models;
-using VideoChat.Core.Multimedia;
+using VoiceEngine.Abstractions.Encoding;
+using VoiceEngine.Abstractions.Models;
+using VoiceEngine.Abstractions.Multimedia;
 
 namespace Multimedia.Audio.Desktop
 {

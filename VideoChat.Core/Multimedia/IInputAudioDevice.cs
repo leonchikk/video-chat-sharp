@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using VideoChat.Core.Models;
+using VoiceEngine.Abstractions.EventArgs;
+using VoiceEngine.Abstractions.Models;
 
-namespace VideoChat.Core.Multimedia
+namespace VoiceEngine.Abstractions.Multimedia
 {
     public interface IInputAudioDevice : IDisposable
     {

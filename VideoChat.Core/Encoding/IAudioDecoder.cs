@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Codec
+﻿namespace VoiceEngine.Abstractions.Encoding
 {
     public interface IAudioDecoder
     {

@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VideoChat.Core\VideoChat.Core.csproj" />
+    <ProjectReference Include="..\VideoChat.Core\VoiceEngine.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

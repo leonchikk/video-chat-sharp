@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace VideoChat.API.Sockets.Models
+namespace VoiceEngine.API.Sockets.Models
 {
     public class UserConnection
     {

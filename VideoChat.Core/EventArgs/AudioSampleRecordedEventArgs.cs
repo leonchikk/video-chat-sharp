@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Models
+﻿namespace VoiceEngine.Abstractions.EventArgs
 {
     public class AudioSampleRecordedEventArgs
     {

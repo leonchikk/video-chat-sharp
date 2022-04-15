@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using VideoChat.Core.Networking;
+using VoiceEngine.Network.Abstractions.Clients;
 
-namespace Networking.Extensions
+namespace VoiceEngine.Network.Extensions
 {
     public static class DepencyInjectionExtensions
     {

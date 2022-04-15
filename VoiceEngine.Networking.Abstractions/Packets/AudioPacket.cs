@@ -1,7 +1,6 @@
 ﻿using System.IO;
-using VideoChat.Core.Enumerations;
 
-namespace VideoChat.Core.Packets
+namespace VoiceEngine.Network.Abstractions.Packets
 {
     public class AudioPacket: Packet
     {

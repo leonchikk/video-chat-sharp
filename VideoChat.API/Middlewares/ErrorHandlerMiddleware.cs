@@ -4,7 +4,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace VideoChat.API.Middlewares
+namespace VoiceEngine.API.Middlewares
 {
     public class ErrorHandlerMiddleware
     {

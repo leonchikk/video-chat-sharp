@@ -1,14 +1,10 @@
-﻿using Multimedia.Audio.Desktop.Codecs;
-using NAudio.Wave;
-using RNNoiseWrapper;
-using SpeexPreprocessor;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using VideoChat.Core.Codec;
-using VideoChat.Core.Models;
-using VideoChat.Core.Multimedia;
+using VoiceEngine.Abstractions.EventArgs;
+using VoiceEngine.Abstractions.Models;
+using VoiceEngine.Abstractions.Multimedia;
 using WebRtcVadSharp;
 
 namespace Multimedia.Audio.Desktop

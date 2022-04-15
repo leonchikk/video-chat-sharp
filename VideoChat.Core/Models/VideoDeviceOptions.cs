@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace VideoChat.Core.Models
+namespace VoiceEngine.Abstractions.Models
 {
     public class VideoDeviceOptions
     {
@@ -15,6 +15,11 @@ namespace VideoChat.Core.Models
             var info = (VideoDeviceOptions)obj;
 
             return info.DeviceNumber == this.DeviceNumber;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

@@ -1,16 +1,17 @@
-﻿using Networking.Factories;
-using System;
-using System.Windows;
-using VideoChat.Core.Enumerations;
-using VideoChat.Core.Models;
-using VideoChat.Core.Multimedia;
-using VideoChat.Core.Networking;
-using VideoChat.Core.Packets;
-using System.Linq;
-using VideoChat.Core.Codec;
-using System.Runtime.InteropServices;
-using SpeexEchoReducer;
+﻿using SpeexEchoReducer;
 using SpeexPreprocessor;
+using System;
+using System.Runtime.InteropServices;
+using System.Windows;
+using VideoChat.Core.Codec;
+using VoiceEngine.Abstractions.EventArgs;
+using VoiceEngine.Abstractions.Models;
+using VoiceEngine.Abstractions.Multimedia;
+using VoiceEngine.Network.Abstractions;
+using VoiceEngine.Network.Abstractions.Clients;
+using VoiceEngine.Network.Abstractions.EventArgs;
+using VoiceEngine.Network.Abstractions.Packets;
+using VoiceEngine.Network.Factories;
 
 namespace VoiceChat.Desktop
 {
@@ -33,7 +34,7 @@ namespace VoiceChat.Desktop
             IOutputAudioDevice outputAudioDevice,
             IWebSocketClient webSocketClient,
             IHttpClientWrapper httpClientWrapper,
-            INoiseReducer noiseReducer, 
+            INoiseReducer noiseReducer,
             IAudioEncoder encoder)
         {
             _inputAudioDevice = inputAudioDevice;

@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Packets
+﻿namespace VoiceEngine.Network.Abstractions.Packets
 {
     public abstract class Packet
     {

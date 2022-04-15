@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using VideoChat.Core.Packets;
+using VoiceEngine.Network.Abstractions.Packets;
 
-namespace Networking.Factories
+namespace VoiceEngine.Network.Factories
 {
     public static class PacketFactory
     {

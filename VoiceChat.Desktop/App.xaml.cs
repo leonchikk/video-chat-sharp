@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Multimedia.Audio.Desktop.Extensions;
-using Networking.Extensions;
 using RNNoiseWrapper.Extensions;
 using System.Windows;
+using VoiceEngine.Network.Extensions;
 
 namespace VoiceChat.Desktop
 {

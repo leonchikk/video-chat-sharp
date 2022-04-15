@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace VideoChat.API.Sockets.Models
+namespace VoiceEngine.API.Sockets.Models
 {
     public class Conversation
     {

@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpusWrapper;
 using VideoChat.Core.Codec;
-using VideoChat.Core.Multimedia;
+using VoiceEngine.Abstractions.Encoding;
+using VoiceEngine.Abstractions.Multimedia;
 
 namespace RNNoiseWrapper.Extensions
 {

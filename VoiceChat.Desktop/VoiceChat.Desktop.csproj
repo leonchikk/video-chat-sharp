@@ -16,9 +16,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Multimedia.Audio.Desktop\Multimedia.Audio.Desktop.csproj" />
-    <ProjectReference Include="..\Networking\Networking.csproj" />
+    <ProjectReference Include="..\Networking\VoiceEngine.Network.csproj" />
     <ProjectReference Include="..\RNNoiseWrapper\OpusWrapper.csproj" />
-    <ProjectReference Include="..\VideoChat.Core\VideoChat.Core.csproj" />
+    <ProjectReference Include="..\VideoChat.Core\VoiceEngine.Abstractions.csproj" />
+    <ProjectReference Include="..\VoiceEngine.Networking.Abstractions\VoiceEngine.Network.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

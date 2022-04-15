@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using VideoChat.Core.Enumerations;
-using VideoChat.Core.Models;
-using VideoChat.Core.Networking;
-using VideoChat.Core.Packets;
+using VoiceEngine.Network.Abstractions;
+using VoiceEngine.Network.Abstractions.Clients;
+using VoiceEngine.Network.Abstractions.EventArgs;
+using VoiceEngine.Network.Abstractions.Packets;
 
-namespace Networking
+namespace VoiceEngine.Network
 {
     public class WebSocketClient : IWebSocketClient
     {
@@ -47,8 +44,8 @@ namespace Networking
 
         public async Task SendPacket(Packet packet)
         {
-            try 
-            { 
+            try
+            {
                 //Note: websocket client cannot send simultaneously packets
                 await _clientSocket.SendAsync(
                         new ArraySegment<byte>(packet.Payload()),
@@ -59,7 +56,7 @@ namespace Networking
             //TODO: Add logger
             catch (Exception)
             {
-               
+
             }
         }
 
@@ -78,7 +75,7 @@ namespace Networking
                         byte[] buffer = new byte[result.Count];
                         Buffer.BlockCopy(receivedStorage, 0, buffer, 0, result.Count);
 
-                        var packetTypeEnum = (PacketTypeEnum) buffer[0];
+                        var packetTypeEnum = (PacketTypeEnum)buffer[0];
                         var payload = new byte[buffer.Length - 1]; //Get rid of packet type byte
                         Buffer.BlockCopy(buffer, 1, payload, 0, payload.Length);
 

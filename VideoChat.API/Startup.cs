@@ -6,10 +6,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.WebSockets;
 using System.Text;
-using VideoChat.API.Middlewares;
-using VideoChat.API.Sockets;
+using VoiceEngine.API.Middlewares;
+using VoiceEngine.API.Sockets;
 
-namespace VideoChat.API
+namespace VoiceEngine.API
 {
     public class Startup
     {

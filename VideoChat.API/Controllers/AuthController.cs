@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VideoChat.API.Controllers
+namespace VoiceEngine.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Multimedia
+﻿namespace VoiceEngine.Abstractions.Multimedia
 {
     public interface INoiseReducer
     {

@@ -1,6 +1,5 @@
-﻿using VideoChat.Core.Enumerations;
-
-namespace VideoChat.Core.Models
+﻿
+namespace VoiceEngine.Network.Abstractions.EventArgs
 {
     public class NetworkMessageReceivedEventArgs
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace VideoChat.Core.Networking
+namespace VoiceEngine.Network.Abstractions.Clients
 {
     public interface IHttpClientWrapper: IDisposable
     {

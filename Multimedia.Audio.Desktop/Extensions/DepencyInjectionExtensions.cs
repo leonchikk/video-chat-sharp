@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using VideoChat.Core.Multimedia;
+using VoiceEngine.Abstractions.Multimedia;
 
 namespace Multimedia.Audio.Desktop.Extensions
 {

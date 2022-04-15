@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using VideoChat.Core.Networking;
+using VoiceEngine.Network.Abstractions.Clients;
 
-namespace Networking
+namespace VoiceEngine.Network
 {
     public class HttpClientWrapper : IHttpClientWrapper
     {

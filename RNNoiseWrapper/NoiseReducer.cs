@@ -1,5 +1,5 @@
 ﻿using System;
-using VideoChat.Core.Multimedia;
+using VoiceEngine.Abstractions.Multimedia;
 
 namespace RNNoiseWrapper
 {

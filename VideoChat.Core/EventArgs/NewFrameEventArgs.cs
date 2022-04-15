@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Models.EventArgs
+﻿namespace VoiceEngine.Abstractions.EventArgs
 {
     public class NewFrameEventArgs
     {

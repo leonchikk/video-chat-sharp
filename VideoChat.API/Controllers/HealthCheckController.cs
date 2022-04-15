@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VideoChat.API.Sockets;
+using VoiceEngine.API.Sockets;
 
-namespace VideoChat.API.Controllers
+namespace VoiceEngine.API.Controllers
 {
     [Route("api/health-check")]
     [ApiController]

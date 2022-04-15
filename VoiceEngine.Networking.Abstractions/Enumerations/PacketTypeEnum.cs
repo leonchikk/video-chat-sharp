@@ -1,4 +1,4 @@
-﻿namespace VideoChat.Core.Enumerations
+﻿namespace VoiceEngine.Network.Abstractions
 {
     public enum PacketTypeEnum : byte
     {

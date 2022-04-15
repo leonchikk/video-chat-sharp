@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using VideoChat.Core.Models;
+using VoiceEngine.Abstractions.Models;
 
 namespace VoiceChat.Desktop.ViewModels
 {
