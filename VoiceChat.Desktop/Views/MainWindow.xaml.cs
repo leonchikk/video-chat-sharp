@@ -69,7 +69,7 @@ namespace VoiceChat.Desktop
                 case PacketTypeEnum.Audio:
                     var audioPacket = e.PacketPayload.ToAudioPacket();
 
-                    //_echoReducer.EchoPlayback(audioPacket.Samples);
+                    _echoReducer.EchoPlayback(audioPacket.Samples);
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
 
                     break;
@@ -83,7 +83,7 @@ namespace VoiceChat.Desktop
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
 
-            //_echoReducer.EchoCapture(pcmInput, output_frame);
+            _echoReducer.EchoCapture(pcmInput, output_frame);
             _preprocessor.Run(output_frame);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
