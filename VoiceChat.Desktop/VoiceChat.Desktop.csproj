@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Networking\VoiceEngine.Network.csproj" />
     <ProjectReference Include="..\RNNoiseWrapper\OpusWrapper.csproj" />
     <ProjectReference Include="..\VideoChat.Core\VoiceEngine.Abstractions.csproj" />
+    <ProjectReference Include="..\VoiceEngine.Filters\VoiceEngine.Filters.csproj" />
     <ProjectReference Include="..\VoiceEngine.Networking.Abstractions\VoiceEngine.Network.Abstractions.csproj" />
   </ItemGroup>
 

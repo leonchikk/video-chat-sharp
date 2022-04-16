@@ -3,7 +3,7 @@ using SpeexPreprocessor;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
-using VideoChat.Core.Codec;
+using VoiceEngine.Abstractions.Encoding;
 using VoiceEngine.Abstractions.EventArgs;
 using VoiceEngine.Abstractions.Filters;
 using VoiceEngine.Abstractions.IO;

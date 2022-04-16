@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpusWrapper;
-using VideoChat.Core.Codec;
+using RNNoiseWrapper;
 using VoiceEngine.Abstractions.Encoding;
 using VoiceEngine.Abstractions.Filters;
 
-namespace RNNoiseWrapper.Extensions
+namespace VoiceEngine.Filters.DependencyInjection
 {
     public static class DepencyInjectionExtensions
     {

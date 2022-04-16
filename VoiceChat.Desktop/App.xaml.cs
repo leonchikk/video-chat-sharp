@@ -1,14 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RNNoiseWrapper.Extensions;
 using System.Windows;
-using VoiceEngine.IO.Desktop.Extensions;
-using VoiceEngine.Network.Extensions;
+using VoiceEngine.IO.Desktop.DependencyInjection;
+using VoiceEngine.Network.DependencyInjection;
+using VoiceEngine.Filters.DependencyInjection;
 
 namespace VoiceChat.Desktop
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private ServiceProvider serviceProvider;
@@ -32,8 +29,8 @@ namespace VoiceChat.Desktop
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var mainWindow = serviceProvider.GetService<Views.SplashScreen>();
-            mainWindow.Show();
+            var splashWindow = serviceProvider.GetService<Views.SplashScreen>();
+            splashWindow.Show();
         }
     }
 }

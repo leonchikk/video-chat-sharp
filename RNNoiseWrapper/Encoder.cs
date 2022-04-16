@@ -1,6 +1,6 @@
 ﻿using RNNoiseWrapper;
 using System;
-using VideoChat.Core.Codec;
+using VoiceEngine.Abstractions.Encoding;
 
 namespace OpusWrapper
 {
