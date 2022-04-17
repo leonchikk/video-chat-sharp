@@ -30,3 +30,24 @@ namespace VoiceEngine.Network.Abstractions.Packets
         }
     }
 }
+
+namespace VoiceEngine.Network.Abstractions.Packets.Convertor
+{
+    public static partial class PacketConvertor
+    {
+        public static AudioPacket ToAudioPacket(byte[] payload)
+        {
+            using (var memoryStream = new MemoryStream(payload))
+            {
+                using (var binaryReader = new BinaryReader(memoryStream))
+                {
+                    var containsSpeech = binaryReader.ReadBoolean();
+                    var samplesCount = binaryReader.ReadInt32();
+                    var samples = binaryReader.ReadBytes(samplesCount);
+
+                    return new AudioPacket(containsSpeech, samples);
+                }
+            }
+        }
+    }
+}

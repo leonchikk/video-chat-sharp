@@ -4,16 +4,16 @@ using VoiceEngine.Network.Abstractions.Packets.Events;
 
 namespace VoiceEngine.Network.Abstractions.Packets.Events
 {
-    public class UserConnectionPacket : EventPacket
+    public class EventPacket : Packet
     {
-        public string AccountId { get; set; }
+        public EventTypeEnum EventType { get; set; }
+        public byte[] PacketPayload { get; set; }
 
-        public UserConnectionPacket(string accountId)
+        public EventPacket(EventTypeEnum eventType, byte[] packetPayload)
         {
-            AccountId = accountId;
-            EventType = EventTypeEnum.UserConnection;
+            EventType = eventType;
+            PacketPayload = packetPayload;
         }
-
 
         public override byte[] Payload()
         {
@@ -22,8 +22,7 @@ namespace VoiceEngine.Network.Abstractions.Packets.Events
                 using (BinaryWriter binaryWriter = new BinaryWriter(stream))
                 {
                     binaryWriter.Write((byte)PacketTypeEnum.Event);
-                    binaryWriter.Write((byte)EventTypeEnum.UserConnection);
-                    binaryWriter.Write(AccountId);
+                    binaryWriter.Write(PacketPayload);
 
                     return stream.ToArray();
                 }
@@ -36,15 +35,16 @@ namespace VoiceEngine.Network.Abstractions.Packets.Convertor
 {
     public static partial class PacketConvertor
     {
-        public static UserConnectionPacket ToUserConnectionPacket(byte[] payload)
+        public static EventPacket ToEventPacket(byte[] payload)
         {
             using (var memoryStream = new MemoryStream(payload))
             {
                 using (var binaryReader = new BinaryReader(memoryStream))
                 {
-                    var accountId = binaryReader.ReadString();
+                    var eventType = (EventTypeEnum)binaryReader.ReadByte();
+                    var packetPayload = binaryReader.ReadBytes(payload.Length - 1);
 
-                    return new UserConnectionPacket(accountId);
+                    return new EventPacket(eventType, packetPayload);
                 }
             }
         }

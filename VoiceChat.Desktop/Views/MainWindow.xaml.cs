@@ -11,8 +11,8 @@ using VoiceEngine.Abstractions.Models;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.Clients;
 using VoiceEngine.Network.Abstractions.EventArgs;
-using VoiceEngine.Network.Abstractions.Extensions;
 using VoiceEngine.Network.Abstractions.Packets;
+using VoiceEngine.Network.Abstractions.Packets.Convertor;
 
 namespace VoiceChat.Desktop
 {
@@ -20,8 +20,8 @@ namespace VoiceChat.Desktop
     {
         private IInputAudioDevice _inputAudioDevice;
         private IOutputAudioDevice _outputAudioDevice;
-        private ISocketClient _webSocketClient;
-        private IRestClient _httpClientWrapper;
+        private ISocketClient _socketClient;
+        private IRestClient _restClient;
         private IAudioEncoder _encoder;
         private INoiseReducer _noiseReducer;
 
@@ -40,8 +40,8 @@ namespace VoiceChat.Desktop
         {
             _inputAudioDevice = inputAudioDevice;
             _outputAudioDevice = outputAudioDevice;
-            _webSocketClient = webSocketClient;
-            _httpClientWrapper = httpClientWrapper;
+            _socketClient = webSocketClient;
+            _restClient = httpClientWrapper;
             _encoder = encoder;
             _noiseReducer = noiseReducer;
 
@@ -56,7 +56,7 @@ namespace VoiceChat.Desktop
             _preprocessor.AgcIncrement = 5;
             _preprocessor.AgcDecrement = -5;
 
-            _webSocketClient.OnMessage += WebSocketClient_OnMessage;
+            _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
 
             InitializeComponent();
@@ -67,14 +67,17 @@ namespace VoiceChat.Desktop
             switch (e.PacketType)
             {
                 case PacketTypeEnum.Audio:
-                    var audioPacket = e.PacketPayload.ToAudioPacket();
+                    var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
                     _echoReducer.EchoPlayback(audioPacket.Samples);
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
+
                     break;
 
                 case PacketTypeEnum.Event:
+                    var eventPacket = PacketConvertor.ToEventPacket(e.PacketPayload);
 
+                    break;
 
                 default:
                     break;
@@ -98,14 +101,14 @@ namespace VoiceChat.Desktop
 
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
-            await _webSocketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
+            await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            _webSocketClient.Disconnect();
-            _webSocketClient.Dispose();
-            _httpClientWrapper.Dispose();
+            _socketClient.Disconnect();
+            _socketClient.Dispose();
+            _restClient.Dispose();
             _inputAudioDevice.Stop();
             _outputAudioDevice.Stop();
         }
@@ -122,9 +125,9 @@ namespace VoiceChat.Desktop
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var token = await _httpClientWrapper.GetAuthorizationToken();
+            var token = await _restClient.GetAuthorizationToken();
 
-            await _webSocketClient.Connect(token);
+            await _socketClient.Connect(token);
 
             _outputAudioDevice.Start();
 
