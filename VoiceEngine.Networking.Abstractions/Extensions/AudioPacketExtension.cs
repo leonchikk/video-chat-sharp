@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using VoiceEngine.Network.Abstractions.Packets;
 
-namespace VoiceEngine.Network.Factories
+namespace VoiceEngine.Network.Abstractions.Extensions
 {
-    public static class PacketFactory
+    public static class AudioPacketExtension
     {
         public static AudioPacket ToAudioPacket(this byte[] payload)
         {

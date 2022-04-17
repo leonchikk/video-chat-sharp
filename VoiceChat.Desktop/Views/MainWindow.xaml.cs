@@ -11,8 +11,8 @@ using VoiceEngine.Abstractions.Models;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.Clients;
 using VoiceEngine.Network.Abstractions.EventArgs;
+using VoiceEngine.Network.Abstractions.Extensions;
 using VoiceEngine.Network.Abstractions.Packets;
-using VoiceEngine.Network.Factories;
 
 namespace VoiceChat.Desktop
 {
@@ -71,8 +71,11 @@ namespace VoiceChat.Desktop
 
                     _echoReducer.EchoPlayback(audioPacket.Samples);
                     _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
-
                     break;
+
+                case PacketTypeEnum.Event:
+
+
                 default:
                     break;
             }
