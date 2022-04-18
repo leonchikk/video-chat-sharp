@@ -61,8 +61,8 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = false;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 8000;
-            _preprocessor.AgcMaxGain = 100;
+            _preprocessor.AgcLevel = 4000;
+            _preprocessor.AgcMaxGain = 30;
             _preprocessor.AgcIncrement = 12;
             _preprocessor.AgcDecrement = -40;
 
@@ -84,10 +84,10 @@ namespace VoiceChat.Desktop
 
                     //_echoReducer.EchoPlayback(decodedSamples);
 
+                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
+
                     _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
-
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     if (_audioRecorder.IsRecording)
                     {
