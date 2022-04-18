@@ -84,8 +84,6 @@ namespace VoiceChat.Desktop
 
                     //_echoReducer.EchoPlayback(decodedSamples);
 
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
-
                     _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
@@ -93,6 +91,8 @@ namespace VoiceChat.Desktop
                     {
                         _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
                     }
+
+                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     break;
 
