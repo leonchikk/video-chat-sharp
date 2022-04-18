@@ -62,9 +62,9 @@ namespace VoiceChat.Desktop
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
             _preprocessor.AgcLevel = 4000;
-            _preprocessor.AgcMaxGain = 15;
-            _preprocessor.AgcIncrement = 6;
-            _preprocessor.AgcDecrement = -20;
+            _preprocessor.AgcMaxGain = 10;
+            _preprocessor.AgcIncrement = 5;
+            _preprocessor.AgcDecrement = -15;
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -82,12 +82,10 @@ namespace VoiceChat.Desktop
                     var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
-                    //_echoReducer.EchoPlayback(decodedSamples);
+                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
-
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     if (_audioRecorder.IsRecording)
                     {
