@@ -61,10 +61,10 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = false;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2500;
-            _preprocessor.AgcMaxGain = 30;
-            _preprocessor.AgcIncrement = 5;
-            _preprocessor.AgcDecrement = -5;
+            _preprocessor.AgcLevel = 8000;
+            _preprocessor.AgcMaxGain = 100;
+            _preprocessor.AgcIncrement = 12;
+            _preprocessor.AgcDecrement = -40;
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
