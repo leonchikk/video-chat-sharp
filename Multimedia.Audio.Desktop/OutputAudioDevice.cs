@@ -16,13 +16,9 @@ namespace VoiceEngine.IO.Desktop
         private BufferedWaveProvider _bufferedWaveProvider;
         private bool _isSetuped = false;
         private bool _disposed = false;
-        private IAudioDecoder _decoder;
-        private short[] _pcmBuffer = new short[480];
 
-        public OutputAudioDevice(IAudioDecoder decoder)
+        public OutputAudioDevice()
         {
-            _decoder = decoder;
-
             SwitchTo(Options?.First());
         }
 

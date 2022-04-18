@@ -16,14 +16,14 @@ namespace VoiceEngine.IO.Desktop
 
         }
 
-        public void AddSamples(byte[] samples)
+        public void AddSamples(byte[] samples, int length)
         {
             if (_writer == null)
             {
                 throw new NullReferenceException(nameof(_writer));
             }
 
-            _writer.Write(samples, 0, samples.Length);
+            _writer.Write(samples, 0, length);
         }
 
         public void Start(string filePath)
@@ -51,7 +51,9 @@ namespace VoiceEngine.IO.Desktop
 
             _disposed = true;
 
+            _writer.Close();
             _writer?.Dispose();
+            _writer = null;
         }
     }
 }

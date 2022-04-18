@@ -1,4 +1,5 @@
-﻿using SpeexEchoReducer;
+﻿using Microsoft.Win32;
+using SpeexEchoReducer;
 using SpeexPreprocessor;
 using System;
 using System.Runtime.InteropServices;
@@ -81,7 +82,13 @@ namespace VoiceChat.Desktop
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
                     //_echoReducer.EchoPlayback(decodedSamples);
-                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedLength, audioPacket.ContainsSpeech);
+
+                    if (_audioRecorder.IsRecording)
+                    {
+                        _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
+                    }
+
+                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
                     break;
 
@@ -173,6 +180,26 @@ namespace VoiceChat.Desktop
 
             _outputAudioDevice.SwitchTo(selectedDevice);
             _outputAudioDevice.Start();
+        }
+
+        private void StartStopRecordingButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_audioRecorder.IsRecording)
+            {
+                var saveFileDialog = new SaveFileDialog();
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    _audioRecorder.Start(saveFileDialog.FileName);
+                    RecordingLabel.Visibility = Visibility.Visible;
+                }
+
+                return;
+            }
+
+            RecordingLabel.Visibility = Visibility.Collapsed;
+
+            _audioRecorder.Stop();
         }
     }
 }
