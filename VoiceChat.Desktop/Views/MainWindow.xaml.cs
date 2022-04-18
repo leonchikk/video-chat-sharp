@@ -34,6 +34,7 @@ namespace VoiceChat.Desktop
 
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
+        private byte[] _echoBuffer = new byte[960];
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -81,6 +82,7 @@ namespace VoiceChat.Desktop
                     var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
+                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
                     //_echoReducer.EchoPlayback(decodedSamples);
 
                     if (_audioRecorder.IsRecording)
@@ -108,6 +110,7 @@ namespace VoiceChat.Desktop
             var output_frame = e.Buffer;
 
             //_echoReducer.EchoCapture(pcmInput, output_frame);
+            _echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
             _preprocessor.Run(output_frame);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
