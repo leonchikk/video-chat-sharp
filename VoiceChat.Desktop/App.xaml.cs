@@ -22,7 +22,7 @@ namespace VoiceChat.Desktop
             services.AddSingleton<MainWindow>();
             services.AddSingleton<Views.SplashScreen>();
             services.AddNetworkInfrastructure();
-            services.AddAudioInputOutputDevices();
+            services.AddInputOutputInfrastructure();
             services.AddOpusCodec();
             services.AddNoiseReducer();
         }

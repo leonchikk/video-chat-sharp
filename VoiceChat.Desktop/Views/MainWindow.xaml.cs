@@ -22,13 +22,17 @@ namespace VoiceChat.Desktop
         private IOutputAudioDevice _outputAudioDevice;
         private ISocketClient _socketClient;
         private IRestClient _restClient;
-        private IAudioEncoder _encoder;
         private INoiseReducer _noiseReducer;
+        private IAudioRecorder _audioRecorder;
+
+        private IAudioEncoder _encoder;
+        private IAudioDecoder _decoder;
 
         private EchoReducer _echoReducer;
         private Preprocessor _preprocessor;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
+        private short[] _pcmDecodedBuffer = new short[480];
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -36,7 +40,9 @@ namespace VoiceChat.Desktop
             ISocketClient webSocketClient,
             IRestClient httpClientWrapper,
             INoiseReducer noiseReducer,
-            IAudioEncoder encoder)
+            IAudioEncoder encoder,
+            IAudioRecorder audioRecorder,
+            IAudioDecoder audioDecoder)
         {
             _inputAudioDevice = inputAudioDevice;
             _outputAudioDevice = outputAudioDevice;
@@ -44,6 +50,8 @@ namespace VoiceChat.Desktop
             _restClient = httpClientWrapper;
             _encoder = encoder;
             _noiseReducer = noiseReducer;
+            _audioRecorder = audioRecorder;
+            _decoder = audioDecoder;
 
             _echoReducer = new EchoReducer(480, 48000);
             _preprocessor = new Preprocessor(480, 48000);
@@ -69,8 +77,11 @@ namespace VoiceChat.Desktop
                 case PacketTypeEnum.Audio:
                     var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
-                    _echoReducer.EchoPlayback(audioPacket.Samples);
-                    _outputAudioDevice?.PlaySamples(audioPacket.Samples, audioPacket.Samples.Length, audioPacket.ContainsSpeech);
+                    var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
+                    var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
+
+                    //_echoReducer.EchoPlayback(decodedSamples);
+                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedLength, audioPacket.ContainsSpeech);
 
                     break;
 
@@ -89,7 +100,7 @@ namespace VoiceChat.Desktop
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
 
-            _echoReducer.EchoCapture(pcmInput, output_frame);
+            //_echoReducer.EchoCapture(pcmInput, output_frame);
             _preprocessor.Run(output_frame);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();

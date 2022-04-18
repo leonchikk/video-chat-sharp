@@ -50,10 +50,7 @@ namespace VoiceEngine.IO.Desktop
                 return;
             }
 
-            var decodedLength = _decoder.Decode(buffer, length, _pcmBuffer);
-            var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmBuffer)).ToArray();
-
-            _bufferedWaveProvider?.AddSamples(decodedSamples, 0, decodedSamples.Length);
+            _bufferedWaveProvider?.AddSamples(buffer, 0, length);
         }
 
         public void SwitchTo(AudioDeviceOptions capability)

@@ -9,6 +9,8 @@ namespace VoiceEngine.Network.Abstractions.Packets.Events
         public EventTypeEnum EventType { get; set; }
         public byte[] PacketPayload { get; set; }
 
+        public EventPacket() { }
+
         public EventPacket(EventTypeEnum eventType, byte[] packetPayload)
         {
             EventType = eventType;
