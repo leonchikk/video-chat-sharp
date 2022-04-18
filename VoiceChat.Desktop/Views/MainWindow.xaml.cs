@@ -90,7 +90,9 @@ namespace VoiceChat.Desktop
                         _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
                     }
 
+                    _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
+
 
                     break;
 
@@ -111,7 +113,7 @@ namespace VoiceChat.Desktop
 
             //_echoReducer.EchoCapture(pcmInput, output_frame);
             _echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
-            _preprocessor.Run(output_frame);
+            //_preprocessor.Run(output_frame);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
 
