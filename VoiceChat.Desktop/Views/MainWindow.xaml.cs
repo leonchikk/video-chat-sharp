@@ -61,10 +61,10 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = false;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 4000;
-            _preprocessor.AgcMaxGain = 90;
-            _preprocessor.AgcIncrement = 36;
-            _preprocessor.AgcDecrement = -120;
+            _preprocessor.AgcLevel = 8000;
+            _preprocessor.AgcMaxGain = 30;
+            _preprocessor.AgcIncrement = 12;
+            _preprocessor.AgcDecrement = -40;
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -81,8 +81,11 @@ namespace VoiceChat.Desktop
 
                     var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
+                    var output_frame = decodedSamples;
 
                     //_echoReducer.EchoPlayback(decodedSamples);
+
+                    _echoReducer.EchoCancellation(decodedSamples, _echoBuffer, output_frame);
 
                     _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
@@ -91,8 +94,6 @@ namespace VoiceChat.Desktop
                     {
                         _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
                     }
-
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     break;
 
@@ -112,8 +113,10 @@ namespace VoiceChat.Desktop
             var output_frame = e.Buffer;
 
             //_echoReducer.EchoCapture(pcmInput, output_frame);
-            _echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
+            //_echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
             //_preprocessor.Run(output_frame);
+
+            Buffer.BlockCopy(output_frame, 0, _echoBuffer, 0, output_frame.Length);
 
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
 
