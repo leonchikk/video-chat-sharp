@@ -29,8 +29,11 @@ namespace VoiceChat.Desktop
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var splashWindow = serviceProvider.GetService<Views.SplashScreen>();
-            splashWindow.Show();
+            //var splashWindow = serviceProvider.GetService<Views.SplashScreen>();
+            //splashWindow.Show();
+
+            var mainWindow = serviceProvider.GetService<MainWindow>();
+            mainWindow.Show();
         }
     }
 }

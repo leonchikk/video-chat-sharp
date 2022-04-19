@@ -61,7 +61,7 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2000;
+            _preprocessor.AgcLevel = 2200;
             _preprocessor.AgcMaxGain = 5;
             _preprocessor.AgcIncrement = 5;
             _preprocessor.AgcDecrement = -5;
