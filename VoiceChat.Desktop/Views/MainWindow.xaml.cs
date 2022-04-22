@@ -29,7 +29,6 @@ namespace VoiceChat.Desktop
         private IAudioEncoder _encoder;
         private IAudioDecoder _decoder;
 
-        private EchoReducer _echoReducer;
         private Preprocessor _preprocessor;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
@@ -55,13 +54,12 @@ namespace VoiceChat.Desktop
             _audioRecorder = audioRecorder;
             _decoder = audioDecoder;
 
-            _echoReducer = new EchoReducer(480, 48000);
             _preprocessor = new Preprocessor(480, 48000);
 
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2200;
+            _preprocessor.AgcLevel = 2000;
             _preprocessor.AgcMaxGain = 5;
             _preprocessor.AgcIncrement = 5;
             _preprocessor.AgcDecrement = -5;
@@ -82,9 +80,10 @@ namespace VoiceChat.Desktop
                     var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
+                    _preprocessor.Run(decodedSamples);
+
                     Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
-                    _preprocessor.Run(decodedSamples);
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
                     if (_audioRecorder.IsRecording)
@@ -109,14 +108,11 @@ namespace VoiceChat.Desktop
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
 
-            //_echoReducer.EchoCapture(pcmInput, output_frame);
-            //_echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
-            //_preprocessor.Run(output_frame);
-
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
 
             _noiseReducer.ReduceNoise(pcmOutput, 0);
-            _echoReducer.EchoCancellation(pcmInput, _echoBuffer, output_frame);
+            _preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
+            //_preprocessor.Run(output_frame);
 
             var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
             var encoded = new byte[encodedLength];

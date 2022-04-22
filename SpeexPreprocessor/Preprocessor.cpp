@@ -9,6 +9,9 @@ using namespace SpeexPreprocessor;
 Preprocessor::Preprocessor(int frameSize, int samplingRate)
 {
 	_state = speex_preprocess_state_init(frameSize, samplingRate);
+	_echoState = speex_echo_state_init(frameSize, samplingRate);
+
+	speex_preprocess_ctl(_state, SPEEX_PREPROCESS_SET_ECHO_STATE, _echoState);
 }
 
 Preprocessor::~Preprocessor()
@@ -17,6 +20,12 @@ Preprocessor::~Preprocessor()
 	{
 		speex_preprocess_state_destroy(_state);
 		_state = nullptr;
+	}
+
+	if (_echoState)
+	{
+		speex_echo_state_destroy(_echoState);
+		_echoState = nullptr;
 	}
 }
 
@@ -163,4 +172,13 @@ bool Preprocessor::Dereverb::get()
 void Preprocessor::Dereverb::set(bool value)
 {
 	SetBoolValue(_state, value, SPEEX_PREPROCESS_SET_DEREVERB);
+}
+
+void Preprocessor::EchoCancellation(array<short>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame)
+{
+	pin_ptr<short> input_frame_buffer = &input_frame[0];
+	pin_ptr<unsigned char> echo_frame_buffer = &echo_frame[0];
+	pin_ptr<unsigned char> output_frame_buffer = &output_frame[0];
+
+	speex_echo_cancellation(_echoState, input_frame_buffer, (spx_int16_t*)echo_frame_buffer, (spx_int16_t*)output_frame_buffer);
 }

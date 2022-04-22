@@ -1,4 +1,5 @@
 #pragma once
+#include <speex/speex_echo.h>
 
 using namespace System;
 
@@ -91,7 +92,10 @@ namespace SpeexPreprocessor
 			bool get();
 			void set(bool value);
 		}
+
+		void EchoCancellation(array<short>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame);
 	private:
 		SpeexPreprocessState* _state;
+		SpeexEchoState* _echoState;
 	};
 }
