@@ -59,7 +59,7 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2000;
+            _preprocessor.AgcLevel = 2100;
             _preprocessor.AgcMaxGain = 5;
             _preprocessor.AgcIncrement = 5;
             _preprocessor.AgcDecrement = -5;
@@ -77,7 +77,7 @@ namespace VoiceChat.Desktop
                 case PacketTypeEnum.Audio:
                     var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
-                    var decodedLength = _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
+                    _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
                     _preprocessor.Run(decodedSamples);
@@ -112,7 +112,6 @@ namespace VoiceChat.Desktop
 
             _noiseReducer.ReduceNoise(pcmOutput, 0);
             _preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
-            //_preprocessor.Run(output_frame);
 
             var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
             var encoded = new byte[encodedLength];
