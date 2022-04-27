@@ -36,6 +36,8 @@ namespace VoiceChat.Desktop
         private byte[] _echoBuffer = new byte[960];
         private byte[] _inputBuffer = new byte[960];
 
+        private bool _isAECEnabled;
+
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
             IOutputAudioDevice outputAudioDevice,
@@ -60,8 +62,8 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 5000;
-            _preprocessor.AgcMaxGain = 50;
+            _preprocessor.AgcLevel = 4100;
+            _preprocessor.AgcMaxGain = 40;
             _preprocessor.AgcIncrement = 20;
             _preprocessor.AgcDecrement = -40;
 
@@ -83,11 +85,13 @@ namespace VoiceChat.Desktop
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
                     var outputBuffer = decodedSamples;
 
-                    _preprocessor.EchoCancellation(decodedSamples, _inputBuffer, outputBuffer);
+                    if (_isAECEnabled)
+                        _preprocessor.EchoCancellation(_inputBuffer, decodedSamples, outputBuffer);
+
                     _preprocessor.Run(outputBuffer);
 
-                    var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
-                    _noiseReducer.ReduceNoise(pcmOutput, 0);
+                    //var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
+                    //_noiseReducer.ReduceNoise(pcmOutput, 0);
 
                     //Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
@@ -112,11 +116,14 @@ namespace VoiceChat.Desktop
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            Array.Copy(e.Buffer, _inputBuffer, e.Bytes);
+            var buffer = e.Buffer;
+
+            _preprocessor.Run(buffer);
+            Array.Copy(buffer, _inputBuffer, e.Bytes);
             //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             //var output_frame = e.Buffer;
             //var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
-            var pcmOutput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
+            var pcmOutput = MemoryMarshal.Cast<byte, short>(buffer).ToArray();
 
             //_noiseReducer.ReduceNoise(pcmOutput, 0);
             //_preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
@@ -207,6 +214,16 @@ namespace VoiceChat.Desktop
             RecordingLabel.Visibility = Visibility.Collapsed;
 
             _audioRecorder.Stop();
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _isAECEnabled = false;
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            _isAECEnabled = true;
         }
     }
 }

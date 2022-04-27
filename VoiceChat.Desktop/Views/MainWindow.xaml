@@ -19,5 +19,6 @@
         <ComboBox SelectionChanged="OutputDeviceDropdown_SelectionChanged" Name="OutputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,76,0,0" VerticalAlignment="Top" Width="294"/>
         <Button Click="StartStopRecordingButton_Click" x:Name="StartStopRecordingButton" Content="Start/Stop Recording" Margin="10,124,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="114"/>
         <Label x:Name="RecordingLabel" Content="Recording..." HorizontalAlignment="Left" Margin="138,121,0,0" VerticalAlignment="Top" Visibility="Collapsed"/>
+        <CheckBox  Content="Echo Cancellation" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked" HorizontalAlignment="Center" Margin="0,126,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>
