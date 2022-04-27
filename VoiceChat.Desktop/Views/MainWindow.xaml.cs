@@ -107,7 +107,6 @@ namespace VoiceChat.Desktop
         {
             var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             var output_frame = e.Buffer;
-
             var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
 
             _noiseReducer.ReduceNoise(pcmOutput, 0);
