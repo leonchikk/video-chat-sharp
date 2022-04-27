@@ -60,10 +60,10 @@ namespace VoiceChat.Desktop
             _preprocessor.Denoise = true;
             _preprocessor.Dereverb = true;
             _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 2100;
-            _preprocessor.AgcMaxGain = 5;
-            _preprocessor.AgcIncrement = 5;
-            _preprocessor.AgcDecrement = -5;
+            _preprocessor.AgcLevel = 5000;
+            _preprocessor.AgcMaxGain = 50;
+            _preprocessor.AgcIncrement = 20;
+            _preprocessor.AgcDecrement = -40;
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -81,22 +81,21 @@ namespace VoiceChat.Desktop
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
 
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
-                    var outputBuffer = new byte[960];
+                    var outputBuffer = decodedSamples;
 
-                    _preprocessor.EchoCancellation(_inputBuffer, decodedSamples, outputBuffer);
+                    _preprocessor.EchoCancellation(decodedSamples, _inputBuffer, outputBuffer);
                     _preprocessor.Run(outputBuffer);
 
                     var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
-
                     _noiseReducer.ReduceNoise(pcmOutput, 0);
 
                     //Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
-                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
+                    _outputAudioDevice?.PlaySamples(outputBuffer, outputBuffer.Length, audioPacket.ContainsSpeech);
 
                     if (_audioRecorder.IsRecording)
                     {
-                        _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
+                        _audioRecorder.AddSamples(outputBuffer, outputBuffer.Length);
                     }
 
                     break;
@@ -113,6 +112,7 @@ namespace VoiceChat.Desktop
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
+            Array.Copy(e.Buffer, _inputBuffer, e.Bytes);
             //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             //var output_frame = e.Buffer;
             //var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
@@ -124,7 +124,6 @@ namespace VoiceChat.Desktop
             var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
             var encoded = new byte[encodedLength];
 
-            Array.Copy(_inputBuffer, e.Buffer, e.Bytes);
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
             await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
