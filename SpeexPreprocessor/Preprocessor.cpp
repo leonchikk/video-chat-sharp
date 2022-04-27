@@ -182,3 +182,12 @@ void Preprocessor::EchoCancellation(array<short>^ input_frame, array<unsigned ch
 
 	speex_echo_cancellation(_echoState, input_frame_buffer, (spx_int16_t*)echo_frame_buffer, (spx_int16_t*)output_frame_buffer);
 }
+
+void Preprocessor::EchoCancellation(array<unsigned char>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame)
+{
+	pin_ptr<unsigned char> input_frame_buffer = &input_frame[0];
+	pin_ptr<unsigned char> echo_frame_buffer = &echo_frame[0];
+	pin_ptr<unsigned char> output_frame_buffer = &output_frame[0];
+
+	speex_echo_cancellation(_echoState, (spx_int16_t*)input_frame_buffer, (spx_int16_t*)echo_frame_buffer, (spx_int16_t*)output_frame_buffer);
+}

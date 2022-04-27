@@ -34,6 +34,7 @@ namespace VoiceChat.Desktop
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
         private byte[] _echoBuffer = new byte[960];
+        private byte[] _inputBuffer = new byte[960];
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -78,11 +79,18 @@ namespace VoiceChat.Desktop
                     var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
+
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
+                    var outputBuffer = new byte[960];
 
-                    _preprocessor.Run(decodedSamples);
+                    _preprocessor.EchoCancellation(_inputBuffer, decodedSamples, outputBuffer);
+                    _preprocessor.Run(outputBuffer);
 
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
+                    var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
+
+                    _noiseReducer.ReduceNoise(pcmOutput, 0);
+
+                    //Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
@@ -105,16 +113,18 @@ namespace VoiceChat.Desktop
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
-            var output_frame = e.Buffer;
-            var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
+            //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
+            //var output_frame = e.Buffer;
+            //var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
+            var pcmOutput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
 
-            _noiseReducer.ReduceNoise(pcmOutput, 0);
-            _preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
+            //_noiseReducer.ReduceNoise(pcmOutput, 0);
+            //_preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
 
             var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
             var encoded = new byte[encodedLength];
 
+            Array.Copy(_inputBuffer, e.Buffer, e.Bytes);
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
             await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));

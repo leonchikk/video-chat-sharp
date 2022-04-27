@@ -94,6 +94,7 @@ namespace SpeexPreprocessor
 		}
 
 		void EchoCancellation(array<short>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame);
+		void EchoCancellation(array<unsigned char>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame);
 	private:
 		SpeexPreprocessState* _state;
 		SpeexEchoState* _echoState;
