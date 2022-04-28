@@ -61,7 +61,7 @@ namespace VoiceChat.Desktop
 
             _inputPreproccesor = new Preprocessor(480, 48000);
 
-            _inputPreproccesor.Denoise = false;
+            _inputPreproccesor.Denoise = true;
             _inputPreproccesor.Dereverb = true;
             _inputPreproccesor.Agc = true;
             _inputPreproccesor.AgcLevel = 8000;
@@ -99,14 +99,14 @@ namespace VoiceChat.Desktop
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
 
                     //if (_isAECEnabled)
-                    _echoReducer.EchoPlayback(decodedSamples);
+                    //_echoReducer.EchoPlayback(decodedSamples);
 
                     //_outputPreproccesor.Run(decodedSamples);
 
                     //var pcmOutput = MemoryMarshal.Cast<byte, short>(decodedSamples).ToArray();
                     //_noiseReducer.ReduceNoise(pcmOutput, 0);
 
-                    //Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
+                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
                     _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
@@ -132,8 +132,9 @@ namespace VoiceChat.Desktop
             var buffer = e.Buffer;
             var outputBuffer = new byte[960];
 
-            _echoReducer.EchoCapture(buffer, outputBuffer);
-
+            
+            _echoReducer.EchoCancellation(buffer, _echoBuffer, outputBuffer);
+            _inputPreproccesor.Run(buffer);
 
             Array.Copy(outputBuffer, _inputBuffer, e.Bytes);
             //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
