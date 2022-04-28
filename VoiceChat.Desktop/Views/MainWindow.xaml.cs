@@ -103,8 +103,9 @@ namespace VoiceChat.Desktop
 
                     //_outputPreproccesor.Run(decodedSamples);
 
-                    //var pcmOutput = MemoryMarshal.Cast<byte, short>(decodedSamples).ToArray();
-                    //_noiseReducer.ReduceNoise(pcmOutput, 0);
+                    _outputPreproccesor.Run(decodedSamples);
+                    var pcmOutput = MemoryMarshal.Cast<byte, short>(decodedSamples).ToArray();
+                    _noiseReducer.ReduceNoise(pcmOutput, 0);
 
                     Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
