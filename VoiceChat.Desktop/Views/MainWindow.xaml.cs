@@ -29,7 +29,9 @@ namespace VoiceChat.Desktop
         private IAudioEncoder _encoder;
         private IAudioDecoder _decoder;
 
-        private Preprocessor _preprocessor;
+        private Preprocessor _inputPreproccesor;
+        private Preprocessor _outputPreproccesor;
+        private EchoReducer _echoReducer;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
@@ -57,15 +59,27 @@ namespace VoiceChat.Desktop
             _audioRecorder = audioRecorder;
             _decoder = audioDecoder;
 
-            _preprocessor = new Preprocessor(480, 48000);
+            _inputPreproccesor = new Preprocessor(480, 48000);
 
-            _preprocessor.Denoise = true;
-            _preprocessor.Dereverb = true;
-            _preprocessor.Agc = true;
-            _preprocessor.AgcLevel = 4100;
-            _preprocessor.AgcMaxGain = 40;
-            _preprocessor.AgcIncrement = 20;
-            _preprocessor.AgcDecrement = -40;
+            _inputPreproccesor.Denoise = false;
+            _inputPreproccesor.Dereverb = true;
+            _inputPreproccesor.Agc = true;
+            _inputPreproccesor.AgcLevel = 8000;
+            _inputPreproccesor.AgcMaxGain = 30;
+            _inputPreproccesor.AgcIncrement = 12;
+            _inputPreproccesor.AgcDecrement = -40;
+
+            _outputPreproccesor = new Preprocessor(480, 48000);
+
+            _outputPreproccesor.Denoise = true;
+            _outputPreproccesor.Dereverb = false;
+            _outputPreproccesor.Agc = true;
+            _outputPreproccesor.AgcLevel = 2200;
+            _outputPreproccesor.AgcMaxGain = 30;
+            _outputPreproccesor.AgcIncrement = 12;
+            _outputPreproccesor.AgcDecrement = -40;
+
+            _echoReducer = new EchoReducer(480, 48000);
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -83,23 +97,22 @@ namespace VoiceChat.Desktop
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
 
                     var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
-                    var outputBuffer = decodedSamples;
 
-                    if (_isAECEnabled)
-                        _preprocessor.EchoCancellation(_inputBuffer, decodedSamples, outputBuffer);
+                    //if (_isAECEnabled)
+                    _echoReducer.EchoPlayback(decodedSamples);
 
-                    _preprocessor.Run(outputBuffer);
+                    //_outputPreproccesor.Run(decodedSamples);
 
-                    //var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
+                    //var pcmOutput = MemoryMarshal.Cast<byte, short>(decodedSamples).ToArray();
                     //_noiseReducer.ReduceNoise(pcmOutput, 0);
 
                     //Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
 
-                    _outputAudioDevice?.PlaySamples(outputBuffer, outputBuffer.Length, audioPacket.ContainsSpeech);
+                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
 
                     if (_audioRecorder.IsRecording)
                     {
-                        _audioRecorder.AddSamples(outputBuffer, outputBuffer.Length);
+                        _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
                     }
 
                     break;
@@ -117,13 +130,16 @@ namespace VoiceChat.Desktop
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
             var buffer = e.Buffer;
+            var outputBuffer = new byte[960];
 
-            _preprocessor.Run(buffer);
-            Array.Copy(buffer, _inputBuffer, e.Bytes);
+            _echoReducer.EchoCapture(buffer, outputBuffer);
+
+
+            Array.Copy(outputBuffer, _inputBuffer, e.Bytes);
             //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
             //var output_frame = e.Buffer;
             //var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
-            var pcmOutput = MemoryMarshal.Cast<byte, short>(buffer).ToArray();
+            var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
 
             //_noiseReducer.ReduceNoise(pcmOutput, 0);
             //_preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);

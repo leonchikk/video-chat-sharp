@@ -64,7 +64,7 @@ namespace VoiceEngine.IO.Desktop
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
             _audioPlayer.Init(_bufferedWaveProvider);
             _audioPlayer.Volume = 1.0f;
-            _audioPlayer.DesiredLatency = 0;
+            _audioPlayer.DesiredLatency = 20;
             _isSetuped = true;
 
             _selectedOption = capability;
