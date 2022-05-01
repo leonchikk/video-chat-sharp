@@ -10,7 +10,7 @@ namespace VoiceEngine.Abstractions.IO
         IEnumerable<AudioDeviceOptions> Options { get; }
         void SwitchTo(AudioDeviceOptions options);
         void ChangeVolume(float volume);
-        void PlaySamples(byte[] buffer, int length, bool containsSpeech = true);
+        void PlaySamples(short[] pcmBuffer, int length);
         void Start();
         void Stop();
     }

@@ -11,6 +11,7 @@ using VoiceEngine.Abstractions.IO;
 using VoiceEngine.Abstractions.Models;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.Clients;
+using VoiceEngine.Network.Abstractions.Enumerations;
 using VoiceEngine.Network.Abstractions.EventArgs;
 using VoiceEngine.Network.Abstractions.Packets;
 using VoiceEngine.Network.Abstractions.Packets.Convertor;
@@ -29,16 +30,10 @@ namespace VoiceChat.Desktop
         private IAudioEncoder _encoder;
         private IAudioDecoder _decoder;
 
-        private Preprocessor _inputPreproccesor;
-        private Preprocessor _outputPreproccesor;
-        private EchoReducer _echoReducer;
+        private Preprocessor _preprocessor;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
-        private byte[] _echoBuffer = new byte[960];
-        private byte[] _inputBuffer = new byte[960];
-
-        private bool _isAECEnabled;
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -59,27 +54,16 @@ namespace VoiceChat.Desktop
             _audioRecorder = audioRecorder;
             _decoder = audioDecoder;
 
-            _inputPreproccesor = new Preprocessor(480, 48000);
-
-            _inputPreproccesor.Denoise = true;
-            _inputPreproccesor.Dereverb = true;
-            _inputPreproccesor.Agc = true;
-            _inputPreproccesor.AgcLevel = 8000;
-            _inputPreproccesor.AgcMaxGain = 30;
-            _inputPreproccesor.AgcIncrement = 12;
-            _inputPreproccesor.AgcDecrement = -40;
-
-            _outputPreproccesor = new Preprocessor(480, 48000);
-
-            _outputPreproccesor.Denoise = true;
-            _outputPreproccesor.Dereverb = false;
-            _outputPreproccesor.Agc = true;
-            _outputPreproccesor.AgcLevel = 2200;
-            _outputPreproccesor.AgcMaxGain = 30;
-            _outputPreproccesor.AgcIncrement = 12;
-            _outputPreproccesor.AgcDecrement = -40;
-
-            _echoReducer = new EchoReducer(480, 48000);
+            _preprocessor = new Preprocessor(480, 48000)
+            {
+                Denoise = true,
+                Dereverb = true,
+                Agc = true,
+                AgcLevel = 4000,
+                AgcMaxGain = 3,
+                AgcIncrement = 80,
+                AgcDecrement = -80
+            };
 
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
@@ -95,31 +79,27 @@ namespace VoiceChat.Desktop
                     var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
-
-                    var decodedSamples = (MemoryMarshal.Cast<short, byte>(_pcmDecodedBuffer)).ToArray();
-
-                    //if (_isAECEnabled)
-                    //_echoReducer.EchoPlayback(decodedSamples);
-
-                    //_outputPreproccesor.Run(decodedSamples);
-
-                    _outputPreproccesor.Run(decodedSamples);
-                    var pcmOutput = MemoryMarshal.Cast<byte, short>(decodedSamples).ToArray();
-                    _noiseReducer.ReduceNoise(pcmOutput, 0);
-
-                    Buffer.BlockCopy(decodedSamples, 0, _echoBuffer, 0, decodedSamples.Length);
-
-                    _outputAudioDevice?.PlaySamples(decodedSamples, decodedSamples.Length, audioPacket.ContainsSpeech);
+                    _preprocessor.Run(_pcmDecodedBuffer);
+                    _noiseReducer.ReduceNoise(_pcmDecodedBuffer, 0);
+                    _outputAudioDevice?.PlaySamples(_pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
 
                     if (_audioRecorder.IsRecording)
                     {
-                        _audioRecorder.AddSamples(decodedSamples, decodedSamples.Length);
+                        _audioRecorder.AddSamples(_pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
                     }
 
                     break;
 
                 case PacketTypeEnum.Event:
                     var eventPacket = PacketConvertor.ToEventPacket(e.PacketPayload);
+
+                    switch (eventPacket.EventType)
+                    {
+                        case EventTypeEnum.UserConnection:
+                            break;
+                        default:
+                            break;
+                    }
 
                     break;
 
@@ -130,28 +110,15 @@ namespace VoiceChat.Desktop
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
         {
-            var buffer = e.Buffer;
-            var outputBuffer = new byte[960];
+            var microBuffer = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
 
-            
-            _echoReducer.EchoCancellation(buffer, _echoBuffer, outputBuffer);
-            _inputPreproccesor.Run(buffer);
-
-            Array.Copy(outputBuffer, _inputBuffer, e.Bytes);
-            //var pcmInput = MemoryMarshal.Cast<byte, short>(e.Buffer).ToArray();
-            //var output_frame = e.Buffer;
-            //var pcmOutput = MemoryMarshal.Cast<byte, short>(output_frame).ToArray();
-            var pcmOutput = MemoryMarshal.Cast<byte, short>(outputBuffer).ToArray();
-
-            //_noiseReducer.ReduceNoise(pcmOutput, 0);
-            //_preprocessor.EchoCancellation(pcmInput, _echoBuffer, output_frame);
-
-            var encodedLength = _encoder.Encode(pcmOutput, _encodedBuffer);
+            var encodedLength = _encoder.Encode(microBuffer, _encodedBuffer);
             var encoded = new byte[encodedLength];
 
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
             await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
+
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -232,16 +199,6 @@ namespace VoiceChat.Desktop
             RecordingLabel.Visibility = Visibility.Collapsed;
 
             _audioRecorder.Stop();
-        }
-
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            _isAECEnabled = false;
-        }
-
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            _isAECEnabled = true;
         }
     }
 }

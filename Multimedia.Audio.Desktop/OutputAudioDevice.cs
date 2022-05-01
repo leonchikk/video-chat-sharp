@@ -38,13 +38,15 @@ namespace VoiceEngine.IO.Desktop
         private AudioDeviceOptions _selectedOption;
         public AudioDeviceOptions SelectedOption => _selectedOption;
 
-        public void PlaySamples(byte[] buffer, int length, bool containsSpeech = true)
+        public void PlaySamples(short[] pcmBuffer, int length)
         {
             //TODO: Add error event here
             if (!_isSetuped)
             {
                 return;
             }
+
+            var buffer = MemoryMarshal.Cast<short, byte>(pcmBuffer).ToArray();
 
             _bufferedWaveProvider?.AddSamples(buffer, 0, length);
         }

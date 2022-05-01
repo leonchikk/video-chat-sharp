@@ -6,7 +6,7 @@ namespace VoiceEngine.Abstractions.IO
     {
         public bool IsRecording { get; }
 
-        public void AddSamples(byte[] samples, int length);
+        public void AddSamples(short[] samples, int length);
         public void Start(string filePath);
         public void Stop();
     }

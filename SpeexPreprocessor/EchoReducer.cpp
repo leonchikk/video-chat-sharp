@@ -77,6 +77,15 @@ void EchoReducer::EchoCancellation(array<short>^ input_frame, array<unsigned cha
 	speex_echo_cancellation(_state, input_frame_buffer, (spx_int16_t*) echo_frame_buffer, (spx_int16_t*)output_frame_buffer);
 }
 
+void EchoReducer::EchoCancellation(array<unsigned char>^ input_frame, array<short>^ echo_frame, array<short>^ output_frame)
+{
+	pin_ptr<unsigned char> input_frame_buffer = &input_frame[0];
+	pin_ptr<short> echo_frame_buffer = &echo_frame[0];
+	pin_ptr<short> output_frame_buffer = &output_frame[0];
+
+	speex_echo_cancellation(_state, (spx_int16_t*)input_frame_buffer, echo_frame_buffer, output_frame_buffer);
+}
+
 
 //speex_echo_playback
 //speex_echo_capture

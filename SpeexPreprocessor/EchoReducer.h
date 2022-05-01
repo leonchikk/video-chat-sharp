@@ -18,6 +18,7 @@ namespace SpeexEchoReducer
 		void EchoCapture(array<short>^ input_frame, array<unsigned char>^ output_frame);
 		void EchoCancellation(array<unsigned char>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame);
 		void EchoCancellation(array<short>^ input_frame, array<unsigned char>^ echo_frame, array<unsigned char>^ output_frame);
+		void EchoCancellation(array<unsigned char>^ input_frame, array<short>^ echo_frame, array<short>^ output_frame);
 	private:
 		SpeexEchoState* _state;
 	};

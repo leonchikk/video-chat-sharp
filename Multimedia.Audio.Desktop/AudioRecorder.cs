@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using System;
+using System.Runtime.InteropServices;
 using VoiceEngine.Abstractions.IO;
 
 namespace VoiceEngine.IO.Desktop
@@ -16,9 +17,11 @@ namespace VoiceEngine.IO.Desktop
 
         }
 
-        public void AddSamples(byte[] samples, int length)
+        public void AddSamples(short[] samples, int length)
         {
-            _writer?.Write(samples, 0, length);
+            var buffer = MemoryMarshal.Cast<short, byte>(samples).ToArray();
+
+            _writer?.Write(buffer, 0, length);
         }
 
         public void Start(string filePath)
