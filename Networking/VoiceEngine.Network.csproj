@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\VideoChat.Core\VoiceEngine.Abstractions.csproj" />
     <ProjectReference Include="..\VoiceEngine.Networking.Abstractions\VoiceEngine.Network.Abstractions.csproj" />
   </ItemGroup>

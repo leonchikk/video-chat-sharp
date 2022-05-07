@@ -21,7 +21,7 @@ namespace VoiceChat.Desktop
         {
             services.AddSingleton<MainWindow>();
             services.AddSingleton<Views.SplashScreen>();
-            services.AddNetworkInfrastructure();
+            services.AddClientInfrastructure();
             services.AddInputOutputInfrastructure();
             services.AddOpusCodec();
             services.AddNoiseReducer();

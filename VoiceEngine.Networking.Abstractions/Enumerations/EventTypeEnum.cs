@@ -2,6 +2,7 @@
 {
     public enum EventTypeEnum : byte
     {
-        UserConnection = 0
+        UserConnection = 0,
+        UserDisconnect = 1
     }
 }

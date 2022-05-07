@@ -13,6 +13,7 @@ namespace VoiceEngine.Network
     {
         //TODO: Move this to the settings
         private readonly string _url = "ws://video-chat-sharp.azurewebsites.net";
+        //private readonly string _url = "ws://192.168.0.107:5000";
 
         private readonly ClientWebSocket _clientSocket;
 
@@ -79,7 +80,7 @@ namespace VoiceEngine.Network
                         var payload = new byte[buffer.Length - 1]; //Get rid of packet type byte
                         Buffer.BlockCopy(buffer, 1, payload, 0, payload.Length);
 
-                        OnMessage?.Invoke(new NetworkMessageReceivedEventArgs(packetTypeEnum, payload));
+                        OnMessage?.Invoke(new NetworkMessageReceivedEventArgs(packetTypeEnum, payload, buffer));
                     }
                 }
                 //TODO: Add logger

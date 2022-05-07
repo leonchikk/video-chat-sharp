@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using SpeexEchoReducer;
 using SpeexPreprocessor;
 using System;
 using System.Runtime.InteropServices;
@@ -15,6 +14,7 @@ using VoiceEngine.Network.Abstractions.Enumerations;
 using VoiceEngine.Network.Abstractions.EventArgs;
 using VoiceEngine.Network.Abstractions.Packets;
 using VoiceEngine.Network.Abstractions.Packets.Convertor;
+using VoiceEngine.Network.Abstractions.Services;
 
 namespace VoiceChat.Desktop
 {
@@ -26,6 +26,7 @@ namespace VoiceChat.Desktop
         private IRestClient _restClient;
         private INoiseReducer _noiseReducer;
         private IAudioRecorder _audioRecorder;
+        private ITokenService _tokenService;
 
         private IAudioEncoder _encoder;
         private IAudioDecoder _decoder;
@@ -34,6 +35,7 @@ namespace VoiceChat.Desktop
 
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
+        private string _accountId;
 
         public MainWindow(
             IInputAudioDevice inputAudioDevice,
@@ -43,7 +45,8 @@ namespace VoiceChat.Desktop
             INoiseReducer noiseReducer,
             IAudioEncoder encoder,
             IAudioRecorder audioRecorder,
-            IAudioDecoder audioDecoder)
+            IAudioDecoder audioDecoder,
+            ITokenService tokenService)
         {
             _inputAudioDevice = inputAudioDevice;
             _outputAudioDevice = outputAudioDevice;
@@ -53,6 +56,7 @@ namespace VoiceChat.Desktop
             _noiseReducer = noiseReducer;
             _audioRecorder = audioRecorder;
             _decoder = audioDecoder;
+            _tokenService = tokenService;
 
             _preprocessor = new Preprocessor(480, 48000)
             {
@@ -81,7 +85,7 @@ namespace VoiceChat.Desktop
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     _preprocessor.Run(_pcmDecodedBuffer);
                     _noiseReducer.ReduceNoise(_pcmDecodedBuffer, 0);
-                    _outputAudioDevice?.PlaySamples(_pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
+                    _outputAudioDevice?.PlaySamples(audioPacket.SenderId, _pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
 
                     if (_audioRecorder.IsRecording)
                     {
@@ -96,6 +100,17 @@ namespace VoiceChat.Desktop
                     switch (eventPacket.EventType)
                     {
                         case EventTypeEnum.UserConnection:
+
+                            var connectionPacket = PacketConvertor.ToUserConnectionPacket(eventPacket.PacketPayload);
+                            _outputAudioDevice.AddInput(connectionPacket.AccountId);
+
+                            break;
+
+                        case EventTypeEnum.UserDisconnect:
+
+                            var disconnectionPacket = PacketConvertor.ToUserDisconnectPacket(eventPacket.PacketPayload);
+                            _outputAudioDevice.RemoveInput(disconnectionPacket.AccountId);
+
                             break;
                         default:
                             break;
@@ -117,7 +132,7 @@ namespace VoiceChat.Desktop
 
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
-            await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded));
+            await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded, _accountId));
 
         }
 
@@ -143,6 +158,8 @@ namespace VoiceChat.Desktop
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var token = await _restClient.GetAuthorizationToken();
+
+            _accountId = _tokenService.GetAccountId(token);
 
             await _socketClient.Connect(token);
 

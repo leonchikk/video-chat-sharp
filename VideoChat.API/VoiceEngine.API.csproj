@@ -12,4 +12,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Networking\VoiceEngine.Network.csproj" />
+  </ItemGroup>
+
 </Project>

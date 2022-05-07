@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System.Net.WebSockets;
 using System.Text;
 using VoiceEngine.API.Middlewares;
-using VoiceEngine.API.Sockets;
+using VoiceEngine.Network.DependencyInjection;
 
 namespace VoiceEngine.API
 {
@@ -15,10 +14,7 @@ namespace VoiceEngine.API
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ConnectionsManager>();
-            services.AddSingleton<SocketHandler>();
             services.AddMvc(options => options.EnableEndpointRouting = false);
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -26,6 +22,7 @@ namespace VoiceEngine.API
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             });
 
+            services.AddServerInfrastructure();
             services.AddAuthentication()
                     .AddJwtBearer(cfg =>
                     {

@@ -1,9 +1,9 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using VoiceEngine.Abstractions.Encoding;
 using VoiceEngine.Abstractions.IO;
 using VoiceEngine.Abstractions.Models;
 
@@ -13,12 +13,17 @@ namespace VoiceEngine.IO.Desktop
     public class OutputAudioDevice : IOutputAudioDevice
     {
         private WaveOut _audioPlayer;
-        private BufferedWaveProvider _bufferedWaveProvider;
         private bool _isSetuped = false;
         private bool _disposed = false;
+        private MixingSampleProvider _mixingSampleProvider;
+        private Dictionary<string, BufferedWaveProvider> _mixerProviders;
 
         public OutputAudioDevice()
         {
+            _mixingSampleProvider = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 1));
+            _mixingSampleProvider.ReadFully = true;
+            _mixerProviders = new Dictionary<string, BufferedWaveProvider>();
+
             SwitchTo(Options?.First());
         }
 
@@ -38,7 +43,7 @@ namespace VoiceEngine.IO.Desktop
         private AudioDeviceOptions _selectedOption;
         public AudioDeviceOptions SelectedOption => _selectedOption;
 
-        public void PlaySamples(short[] pcmBuffer, int length)
+        public void PlaySamples(string inputId, short[] pcmBuffer, int length)
         {
             //TODO: Add error event here
             if (!_isSetuped)
@@ -48,7 +53,7 @@ namespace VoiceEngine.IO.Desktop
 
             var buffer = MemoryMarshal.Cast<short, byte>(pcmBuffer).ToArray();
 
-            _bufferedWaveProvider?.AddSamples(buffer, 0, length);
+            _mixerProviders[inputId]?.AddSamples(buffer, 0, length);
         }
 
         public void SwitchTo(AudioDeviceOptions capability)
@@ -59,14 +64,11 @@ namespace VoiceEngine.IO.Desktop
                 return;
             }
 
-            _bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1));
-            _bufferedWaveProvider.BufferDuration = TimeSpan.FromMilliseconds(150);
-            _bufferedWaveProvider.DiscardOnBufferOverflow = true;
             _audioPlayer = new WaveOut();
             _audioPlayer.DeviceNumber = capability.DeviceNumber;
-            _audioPlayer.Init(_bufferedWaveProvider);
+            _audioPlayer.Init(_mixingSampleProvider, true);
             _audioPlayer.Volume = 1.0f;
-            _audioPlayer.DesiredLatency = 20;
+            _audioPlayer.DesiredLatency = 10;
             _isSetuped = true;
 
             _selectedOption = capability;
@@ -85,7 +87,6 @@ namespace VoiceEngine.IO.Desktop
         public void Stop()
         {
             _audioPlayer?.Stop();
-            _bufferedWaveProvider?.ClearBuffer();
         }
 
         public void Dispose()
@@ -107,6 +108,25 @@ namespace VoiceEngine.IO.Desktop
             }
 
             _audioPlayer.Volume = volume;
+        }
+
+        public void AddInput(string inputId)
+        {
+            var bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1))
+            {
+                BufferDuration = TimeSpan.FromMilliseconds(150),
+                DiscardOnBufferOverflow = true
+            };
+
+            _mixerProviders.Add(inputId, bufferedWaveProvider);
+            _mixingSampleProvider.AddMixerInput(bufferedWaveProvider);
+        }
+
+        public void RemoveInput(string inputId)
+        {
+            _mixerProviders[inputId]?.ClearBuffer();
+            _mixingSampleProvider.RemoveMixerInput(_mixerProviders[inputId].ToSampleProvider());
+            _mixerProviders.Remove(inputId);
         }
     }
 }

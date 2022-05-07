@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VoiceEngine.API.Sockets;
+using VoiceEngine.Network.Abstractions.Server;
 
 namespace VoiceEngine.API.Controllers
 {
@@ -7,9 +7,9 @@ namespace VoiceEngine.API.Controllers
     [ApiController]
     public class HealthCheckController : ControllerBase
     {
-        private readonly ConnectionsManager _connectionManager;
+        private readonly IConnectionManager _connectionManager;
 
-        public HealthCheckController(ConnectionsManager connectionManager)
+        public HealthCheckController(IConnectionManager connectionManager)
         {
             _connectionManager = connectionManager;
         }
@@ -17,7 +17,7 @@ namespace VoiceEngine.API.Controllers
         [HttpGet]
         public IActionResult HealthCheck()
         {
-            return Ok($"API is available. Current online : {_connectionManager.UsersConnections.Count}");
+            return Ok($"API is available. Current online: {_connectionManager.Online}");
         }
     }
 }
