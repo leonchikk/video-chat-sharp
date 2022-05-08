@@ -52,6 +52,7 @@ namespace VoiceEngine.Network.Server.SocketAdapters
             {
                 while (_webSocket.State == WebSocketState.Open)
                 {
+
                     var result = await _webSocket.ReceiveAsync(buffer: new ArraySegment<byte>(_buffer), cancellationToken: CancellationToken.None);
 
                     if (result.EndOfMessage)
@@ -67,7 +68,6 @@ namespace VoiceEngine.Network.Server.SocketAdapters
                     }
                 }
             }
-            catch(Exception) {  }
             finally
             {
                 Dispose();

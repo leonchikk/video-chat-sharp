@@ -39,7 +39,7 @@ namespace VoiceEngine.API.Middlewares
 
             if (string.IsNullOrEmpty(accountId))
             {
-                await _socket.Close();
+                _ = _socket.Close();
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace VoiceEngine.API.Middlewares
             _connectionManager.Remove(accountId);
         }
 
-        private void OnMessage(NetworkMessageReceivedEventArgs obj)
+        private async void OnMessage(NetworkMessageReceivedEventArgs obj)
         {
             switch (obj.PacketType)
             {
@@ -68,7 +68,7 @@ namespace VoiceEngine.API.Middlewares
                 case PacketTypeEnum.Audio:
 
                     var audioPacket = PacketConvertor.ToAudioPacket(obj.PacketPayload);
-                    _broadcaster.ToAllExcept(audioPacket.SenderId, obj.RawPayload);
+                    _ = _broadcaster.ToAllExcept(audioPacket.SenderId, obj.RawPayload);
 
                     break;
                 case PacketTypeEnum.Event:

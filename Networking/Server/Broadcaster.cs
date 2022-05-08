@@ -28,7 +28,7 @@ namespace VoiceEngine.Network.Server
                 {
                     await recipient.Socket.Send(packet);
                 }
-                catch(WebSocketException)
+                catch(WebSocketException ex)
                 {
                     _connectionManager.Remove(recipient.AccountId);
                     continue;

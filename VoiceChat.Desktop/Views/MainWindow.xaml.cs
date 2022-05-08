@@ -90,7 +90,7 @@ namespace VoiceChat.Desktop
 
                     if (_audioRecorder.IsRecording)
                     {
-                        _audioRecorder.AddSamples(_pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
+                        _audioRecorder.AddSamples(audioPacket.SenderId, _pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
                     }
 
                     break;
@@ -120,7 +120,9 @@ namespace VoiceChat.Desktop
                         case EventTypeEnum.UserConnection:
 
                             var connectionPacket = PacketConvertor.ToUserConnectionPacket(eventPacket.PacketPayload);
+
                             _outputAudioDevice.AddInput(connectionPacket.AccountId);
+                            _audioRecorder.AddInput(connectionPacket.AccountId);
 
                             Dispatcher.Invoke(() =>
                             {
@@ -132,7 +134,9 @@ namespace VoiceChat.Desktop
                         case EventTypeEnum.UserDisconnect:
 
                             var disconnectionPacket = PacketConvertor.ToUserDisconnectPacket(eventPacket.PacketPayload);
+
                             _outputAudioDevice.RemoveInput(disconnectionPacket.AccountId);
+                            _audioRecorder.RemoveInput(disconnectionPacket.AccountId);
 
                             break;
                         default:

@@ -55,7 +55,7 @@ namespace VoiceEngine.Network
                         CancellationToken.None);
             }
             //TODO: Add logger
-            catch (Exception)
+            catch (Exception ex)
             {
 
             }

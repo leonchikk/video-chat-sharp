@@ -18,9 +18,14 @@ namespace VoiceEngine.Network.Server
 
         public int Online => _connections.Skip(0).Count();
 
+        public event Action<Connection> OnConnect;
+        public event Action<Connection> OnDisconnect;
+
         public void Add(Connection connection)
         {
             _connections.AddOrUpdate(connection.AccountId, connection, (key, oldValue) => connection);
+
+            OnConnect?.Invoke(connection);
         }
 
         public Connection Get(string accountId)
@@ -38,6 +43,8 @@ namespace VoiceEngine.Network.Server
         public void Remove(string accountId)
         {
             _connections.TryRemove(accountId, out var connection);
+
+            OnDisconnect?.Invoke(connection);
         }
     }
 }
