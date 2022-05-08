@@ -4,6 +4,7 @@
     {
         Video = 0,
         Audio = 1,
-        Event = 2
+        Event = 2,
+        UserList = 3
     }
 }

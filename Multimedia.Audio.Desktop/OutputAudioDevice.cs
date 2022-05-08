@@ -112,6 +112,9 @@ namespace VoiceEngine.IO.Desktop
 
         public void AddInput(string inputId)
         {
+            if (_mixerProviders.ContainsKey(inputId))
+                return;
+
             var bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(48000, 16, 1))
             {
                 BufferDuration = TimeSpan.FromMilliseconds(150),

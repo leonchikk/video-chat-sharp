@@ -7,7 +7,7 @@
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="MadJuns" Height="200" Width="385">
+        Title="MadJuns" Height="284" Width="383">
     <Grid Margin="0,0,4,0">
         <Button Click="MicroOnButton_Click" x:Name="MicroOnButton" Content="Micro On" Margin="204,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
         <Button Click="MicroOffButton_Click"  x:Name="MicroOffButton" Content="Micro Off" Margin="284,20,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
@@ -19,5 +19,8 @@
         <ComboBox SelectionChanged="OutputDeviceDropdown_SelectionChanged" Name="OutputDeviceDropdown" DisplayMemberPath="Name" SelectedValuePath="DeviceNumber" HorizontalAlignment="Left" Margin="65,76,0,0" VerticalAlignment="Top" Width="294"/>
         <Button Click="StartStopRecordingButton_Click" x:Name="StartStopRecordingButton" Content="Start/Stop Recording" Margin="10,124,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="114"/>
         <Label x:Name="RecordingLabel" Content="Recording..." HorizontalAlignment="Left" Margin="138,121,0,0" VerticalAlignment="Top" Visibility="Collapsed"/>
+        <Label x:Name="MyIdLabel" Content="Id:" HorizontalAlignment="Left" Margin="8,178,0,0" VerticalAlignment="Top"/>
+        <Label Content="Others Id:" HorizontalAlignment="Left" Margin="9,219,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="OthersIdLabel"  Content="" HorizontalAlignment="Left" Margin="85,219,0,0" VerticalAlignment="Top" Width="194" Height="26"/>
     </Grid>
 </Window>

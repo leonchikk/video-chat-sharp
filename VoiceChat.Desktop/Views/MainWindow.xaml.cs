@@ -80,6 +80,7 @@ namespace VoiceChat.Desktop
             switch (e.PacketType)
             {
                 case PacketTypeEnum.Audio:
+
                     var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
 
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
@@ -94,7 +95,24 @@ namespace VoiceChat.Desktop
 
                     break;
 
+                case PacketTypeEnum.UserList:
+
+                    var userListPacket = PacketConvertor.ToUserListPacket(e.PacketPayload);
+
+                    foreach (var userId in userListPacket.Ids)
+                    {
+                        _outputAudioDevice.AddInput(userId);
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            OthersIdLabel.Content = userId;
+                        });
+                    }
+
+                    break;
+
                 case PacketTypeEnum.Event:
+
                     var eventPacket = PacketConvertor.ToEventPacket(e.PacketPayload);
 
                     switch (eventPacket.EventType)
@@ -103,6 +121,11 @@ namespace VoiceChat.Desktop
 
                             var connectionPacket = PacketConvertor.ToUserConnectionPacket(eventPacket.PacketPayload);
                             _outputAudioDevice.AddInput(connectionPacket.AccountId);
+
+                            Dispatcher.Invoke(() =>
+                            {
+                                OthersIdLabel.Content = connectionPacket.AccountId;
+                            });
 
                             break;
 
@@ -133,7 +156,6 @@ namespace VoiceChat.Desktop
             Array.Copy(_encodedBuffer, encoded, encodedLength);
 
             await _socketClient.SendPacket(new AudioPacket(e.ContainsSpeech, encoded, _accountId));
-
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -160,6 +182,8 @@ namespace VoiceChat.Desktop
             var token = await _restClient.GetAuthorizationToken();
 
             _accountId = _tokenService.GetAccountId(token);
+
+            MyIdLabel.Content = $"Id: {_accountId}";
 
             await _socketClient.Connect(token);
 

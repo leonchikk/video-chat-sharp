@@ -80,11 +80,18 @@ namespace VoiceEngine.Network.Server
             }
         }
 
-        public Task ToUser(string userAccountId, byte[] packet)
+        public async Task ToUser(string userAccountId, byte[] packet)
         {
             var targetConnection = _connectionManager.Get(userAccountId);
 
-            return targetConnection.Socket.Send(packet);
+            try
+            {
+                await targetConnection.Socket.Send(packet);
+            }
+            catch (WebSocketException)
+            {
+                _connectionManager.Remove(targetConnection.AccountId);
+            }
         }
     }
 }
