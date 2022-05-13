@@ -16,6 +16,7 @@ namespace VoiceEngine.Network.Server.SocketAdapters
         private readonly WebSocket _webSocket;
 
         public event Action<NetworkMessageReceivedEventArgs> OnMessage;
+        public event Action OnDisconnect;
 
         public WebSocketAdapter(WebSocket webSocket)
         {
@@ -70,7 +71,7 @@ namespace VoiceEngine.Network.Server.SocketAdapters
             }
             finally
             {
-                Dispose();
+                OnDisconnect?.Invoke();
             }
         }
     }

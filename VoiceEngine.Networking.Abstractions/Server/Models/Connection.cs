@@ -9,6 +9,9 @@
         }
 
         public string AccountId { get; private set; }
+        public string NickName { get; set; }
         public ISocket Socket { get; private set; }
+
+        public bool FinishedHandshake => !string.IsNullOrWhiteSpace(NickName);
     }
 }

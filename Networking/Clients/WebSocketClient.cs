@@ -13,7 +13,7 @@ namespace VoiceEngine.Network
     {
         //TODO: Move this to the settings
         private readonly string _url = "ws://video-chat-sharp.azurewebsites.net";
-        //private readonly string _url = "ws://192.168.0.107:5000";
+        //private readonly string _url = "ws://192.168.0.108:5000";
 
         private readonly ClientWebSocket _clientSocket;
 

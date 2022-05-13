@@ -53,7 +53,8 @@ namespace VoiceEngine.IO.Desktop
 
             var buffer = MemoryMarshal.Cast<short, byte>(pcmBuffer).ToArray();
 
-            _mixerProviders[inputId]?.AddSamples(buffer, 0, length);
+            if (_mixerProviders.ContainsKey(inputId))
+                _mixerProviders[inputId]?.AddSamples(buffer, 0, length);
         }
 
         public void SwitchTo(AudioDeviceOptions capability)

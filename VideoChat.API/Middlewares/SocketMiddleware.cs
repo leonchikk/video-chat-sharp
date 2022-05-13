@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using VoiceEngine.Network.Abstractions;
@@ -17,7 +18,6 @@ namespace VoiceEngine.API.Middlewares
         private readonly RequestDelegate _next;
         private readonly IConnectionManager _connectionManager;
         private readonly IBroadcaster _broadcaster;
-        private ISocket _socket;
 
         public SocketMiddleware(
             RequestDelegate next,
@@ -35,31 +35,33 @@ namespace VoiceEngine.API.Middlewares
                 return;
 
             var accountId = context.User.Claims.FirstOrDefault(x => x.Type == "AccountId")?.Value;
-            _socket = new WebSocketAdapter(await context.WebSockets.AcceptWebSocketAsync());
+            var socket = new WebSocketAdapter(await context.WebSockets.AcceptWebSocketAsync());
+
+            socket.OnMessage += OnMessage;
 
             if (string.IsNullOrEmpty(accountId))
             {
-                _ = _socket.Close();
+                await socket.Close();
                 return;
             }
 
-            _socket.OnMessage += OnMessage;
-            _connectionManager.Add(new Connection(accountId, _socket));
+            socket.OnDisconnect += async () =>
+            {
+                if (_connectionManager.Get(accountId) == null)
+                    return;
 
-            await _broadcaster.ToUser(accountId, new UsersListPacket(
-                _connectionManager.Get()
-                                  .Where(x => x.AccountId != accountId)
-                                  .Select(x => x.AccountId)
-                                  .ToArray()
-                ));
-            await _broadcaster.ToAllExcept(accountId, new UserConnectionPacket(accountId));
-            await _socket.HandleIncomings();
-            await _broadcaster.ToAllExcept(accountId, new UserDisconnectPacket(accountId));
+                _connectionManager.Remove(accountId);
 
-            _connectionManager.Remove(accountId);
+                await _broadcaster.ToAllExcept(accountId, new UserDisconnectPacket(accountId));
+            };
+
+            _connectionManager.Add(new Connection(accountId, socket));
+
+            await socket.Send(new InitHandshakePacket());
+            await socket.HandleIncomings();
         }
 
-        private async void OnMessage(NetworkMessageReceivedEventArgs obj)
+        private void OnMessage(NetworkMessageReceivedEventArgs obj)
         {
             switch (obj.PacketType)
             {
@@ -71,10 +73,22 @@ namespace VoiceEngine.API.Middlewares
                     _ = _broadcaster.ToAllExcept(audioPacket.SenderId, obj.RawPayload);
 
                     break;
-                case PacketTypeEnum.Event:
+                case PacketTypeEnum.FinishHandshake:
+
+                    var finishHandshakePacket = PacketConvertor.ToFinishHandshakePacket(obj.PacketPayload);
+
+                    _ = _broadcaster.ToUser(finishHandshakePacket.SenderId, new UsersListPacket
+                                        (
+                                            _connectionManager.Get()
+                                                              .Where(x => x.AccountId != finishHandshakePacket.SenderId)
+                                                              .Select(x => x.AccountId)
+                                                              .ToArray()
+                                        ));
+
+                    _ = _broadcaster.ToAllExcept(finishHandshakePacket.SenderId, new UserConnectionPacket(finishHandshakePacket.SenderId));
+
                     break;
-                case PacketTypeEnum.UserList:
-                    break;
+
                 default:
                     break;
             }

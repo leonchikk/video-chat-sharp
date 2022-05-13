@@ -8,6 +8,7 @@ namespace VoiceEngine.Network.Abstractions.Server
     public interface ISocket: IDisposable
     {
         event Action<NetworkMessageReceivedEventArgs> OnMessage;
+        event Action OnDisconnect;
 
         Task Send(Packet packet);
         Task Send(byte[] packet);

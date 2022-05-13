@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using SpeexPreprocessor;
+﻿using SpeexPreprocessor;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -25,7 +24,6 @@ namespace VoiceChat.Desktop
         private ISocketClient _socketClient;
         private IRestClient _restClient;
         private INoiseReducer _noiseReducer;
-        private IAudioRecorder _audioRecorder;
         private ITokenService _tokenService;
 
         private IAudioEncoder _encoder;
@@ -44,7 +42,6 @@ namespace VoiceChat.Desktop
             IRestClient httpClientWrapper,
             INoiseReducer noiseReducer,
             IAudioEncoder encoder,
-            IAudioRecorder audioRecorder,
             IAudioDecoder audioDecoder,
             ITokenService tokenService)
         {
@@ -54,7 +51,6 @@ namespace VoiceChat.Desktop
             _restClient = httpClientWrapper;
             _encoder = encoder;
             _noiseReducer = noiseReducer;
-            _audioRecorder = audioRecorder;
             _decoder = audioDecoder;
             _tokenService = tokenService;
 
@@ -75,23 +71,18 @@ namespace VoiceChat.Desktop
             InitializeComponent();
         }
 
-        private void WebSocketClient_OnMessage(NetworkMessageReceivedEventArgs e)
+        private async void WebSocketClient_OnMessage(NetworkMessageReceivedEventArgs e)
         {
             switch (e.PacketType)
             {
                 case PacketTypeEnum.Audio:
 
-                    var audioPacket =  PacketConvertor.ToAudioPacket(e.PacketPayload);
+                    var audioPacket = PacketConvertor.ToAudioPacket(e.PacketPayload);
 
                     _decoder.Decode(audioPacket.Samples, audioPacket.Samples.Length, _pcmDecodedBuffer);
                     _preprocessor.Run(_pcmDecodedBuffer);
                     _noiseReducer.ReduceNoise(_pcmDecodedBuffer, 0);
                     _outputAudioDevice?.PlaySamples(audioPacket.SenderId, _pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
-
-                    if (_audioRecorder.IsRecording)
-                    {
-                        _audioRecorder.AddSamples(audioPacket.SenderId, _pcmDecodedBuffer, _pcmDecodedBuffer.Length * sizeof(short));
-                    }
 
                     break;
 
@@ -102,12 +93,13 @@ namespace VoiceChat.Desktop
                     foreach (var userId in userListPacket.Ids)
                     {
                         _outputAudioDevice.AddInput(userId);
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            OthersIdLabel.Content = userId;
-                        });
                     }
+
+                    break;
+
+                case PacketTypeEnum.InitHandshake:
+
+                    await _socketClient.SendPacket(new FinishHandshakePacket(_accountId, "Test"));
 
                     break;
 
@@ -122,12 +114,6 @@ namespace VoiceChat.Desktop
                             var connectionPacket = PacketConvertor.ToUserConnectionPacket(eventPacket.PacketPayload);
 
                             _outputAudioDevice.AddInput(connectionPacket.AccountId);
-                            _audioRecorder.AddInput(connectionPacket.AccountId);
-
-                            Dispatcher.Invoke(() =>
-                            {
-                                OthersIdLabel.Content = connectionPacket.AccountId;
-                            });
 
                             break;
 
@@ -136,7 +122,6 @@ namespace VoiceChat.Desktop
                             var disconnectionPacket = PacketConvertor.ToUserDisconnectPacket(eventPacket.PacketPayload);
 
                             _outputAudioDevice.RemoveInput(disconnectionPacket.AccountId);
-                            _audioRecorder.RemoveInput(disconnectionPacket.AccountId);
 
                             break;
                         default:
@@ -187,8 +172,6 @@ namespace VoiceChat.Desktop
 
             _accountId = _tokenService.GetAccountId(token);
 
-            MyIdLabel.Content = $"Id: {_accountId}";
-
             await _socketClient.Connect(token);
 
             _outputAudioDevice.Start();
@@ -224,26 +207,6 @@ namespace VoiceChat.Desktop
 
             _outputAudioDevice.SwitchTo(selectedDevice);
             _outputAudioDevice.Start();
-        }
-
-        private void StartStopRecordingButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_audioRecorder.IsRecording)
-            {
-                var saveFileDialog = new SaveFileDialog();
-
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    _audioRecorder.Start(saveFileDialog.FileName);
-                    RecordingLabel.Visibility = Visibility.Visible;
-                }
-
-                return;
-            }
-
-            RecordingLabel.Visibility = Visibility.Collapsed;
-
-            _audioRecorder.Stop();
         }
     }
 }
