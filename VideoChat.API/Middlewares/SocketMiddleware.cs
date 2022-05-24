@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.EventArgs;
+using VoiceEngine.Network.Abstractions.Models;
 using VoiceEngine.Network.Abstractions.Packets;
 using VoiceEngine.Network.Abstractions.Packets.Convertor;
 using VoiceEngine.Network.Abstractions.Packets.Events;
@@ -76,16 +77,20 @@ namespace VoiceEngine.API.Middlewares
                 case PacketTypeEnum.FinishHandshake:
 
                     var finishHandshakePacket = PacketConvertor.ToFinishHandshakePacket(obj.PacketPayload);
+                    var sender = _connectionManager.Get(finishHandshakePacket.SenderId);
+
+                    sender.NickName = finishHandshakePacket.Nickname;
 
                     _ = _broadcaster.ToUser(finishHandshakePacket.SenderId, new UsersListPacket
                                         (
                                             _connectionManager.Get()
                                                               .Where(x => x.AccountId != finishHandshakePacket.SenderId)
-                                                              .Select(x => x.AccountId)
+                                                              .Where(x => x.FinishedHandshake)
+                                                              .Select(x => new UserInfoModel(x.AccountId, x.NickName))
                                                               .ToArray()
                                         ));
 
-                    _ = _broadcaster.ToAllExcept(finishHandshakePacket.SenderId, new UserConnectionPacket(finishHandshakePacket.SenderId));
+                    _ = _broadcaster.ToAllExcept(finishHandshakePacket.SenderId, new UserConnectionPacket(finishHandshakePacket.SenderId, finishHandshakePacket.Nickname));
 
                     break;
 

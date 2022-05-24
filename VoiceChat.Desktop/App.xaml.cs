@@ -3,6 +3,8 @@ using System.Windows;
 using VoiceEngine.IO.Desktop.DependencyInjection;
 using VoiceEngine.Network.DependencyInjection;
 using VoiceEngine.Filters.DependencyInjection;
+using VoiceChat.Desktop.Windows;
+using VoiceChat.Desktop.ViewModels;
 
 namespace VoiceChat.Desktop
 {
@@ -19,17 +21,23 @@ namespace VoiceChat.Desktop
 
         private void ConfigureServices(ServiceCollection services)
         {
-            services.AddSingleton<MainWindow>();
-            services.AddSingleton<Views.SplashScreen>();
+            services.AddSingleton<ConversationWindow>();
+            services.AddSingleton<SplashWindow>();
+            services.AddSingleton<SignInWindow>();
             services.AddClientInfrastructure();
             services.AddInputOutputInfrastructure();
             services.AddOpusCodec();
             services.AddNoiseReducer();
+
+            services.AddSingleton<ConversationViewModel>();
+            services.AddSingleton<SplashViewModel>();
+            services.AddSingleton<SignInViewModel>();
         }
 
         private void OnStartup(object sender, StartupEventArgs e)
         {
-            var splashWindow = serviceProvider.GetService<Views.SplashScreen>();
+            var splashWindow = serviceProvider.GetService<SplashWindow>();
+
             splashWindow.Show();
         }
     }

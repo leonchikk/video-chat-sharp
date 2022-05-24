@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 using VoiceEngine.Network.Abstractions.Enumerations;
 using VoiceEngine.Network.Abstractions.Packets.Events;
 
@@ -7,10 +8,12 @@ namespace VoiceEngine.Network.Abstractions.Packets.Events
     public class UserConnectionPacket : EventPacket
     {
         public string AccountId { get; set; }
+        public string Nickname { get; set; }
 
-        public UserConnectionPacket(string accountId)
+        public UserConnectionPacket(string accountId, string nickname)
         {
             AccountId = accountId;
+            Nickname = nickname;
             EventType = EventTypeEnum.UserConnection;
         }
 
@@ -21,9 +24,14 @@ namespace VoiceEngine.Network.Abstractions.Packets.Events
             {
                 using (BinaryWriter binaryWriter = new BinaryWriter(stream))
                 {
+                    var encoding = Encoding.UTF8;
+
                     binaryWriter.Write((byte)PacketTypeEnum.Event);
                     binaryWriter.Write((byte)EventTypeEnum.UserConnection);
-                    binaryWriter.Write(AccountId);
+                    binaryWriter.Write(encoding.GetByteCount(AccountId));
+                    binaryWriter.Write(encoding.GetBytes(AccountId));
+                    binaryWriter.Write(encoding.GetByteCount(Nickname));
+                    binaryWriter.Write(encoding.GetBytes(Nickname));
 
                     return stream.ToArray();
                 }
@@ -42,9 +50,13 @@ namespace VoiceEngine.Network.Abstractions.Packets.Convertor
             {
                 using (var binaryReader = new BinaryReader(memoryStream))
                 {
-                    var accountId = binaryReader.ReadString();
+                    var accountIdBytescount = binaryReader.ReadInt32();
+                    var accountIdBytes = binaryReader.ReadBytes(accountIdBytescount);
 
-                    return new UserConnectionPacket(accountId);
+                    var nicknameBytescount = binaryReader.ReadInt32();
+                    var nicknameBytes = binaryReader.ReadBytes(nicknameBytescount);
+
+                    return new UserConnectionPacket(Encoding.UTF8.GetString(accountIdBytes), Encoding.UTF8.GetString(nicknameBytes));
                 }
             }
         }

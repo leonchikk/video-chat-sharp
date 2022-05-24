@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="VoiceChat.Desktop.Controls.UsersList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VoiceChat.Desktop.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <ListBox ItemsSource="{Binding ConnectionsList}">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <DockPanel Margin="2">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Margin="5 0 0 0" Width="42" Height="42">
+                            <Grid Width="20" Height="20">
+                                <Ellipse Fill="#4a53b0"/>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding FirstLetter}" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Viewbox>
+                        <StackPanel Orientation="Vertical" Width="250">
+                            <Label HorizontalAlignment="Left"
+                           FontWeight="DemiBold" 
+                           FontSize="14" 
+                           Content="{Binding Nickname}" 
+                           Width="200" 
+                           Height="24"></Label>
+                            <Label HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Foreground="#b9bbbe"
+                           FontWeight="Thin" 
+                           FontSize="10"
+                           Content="{Binding AccountId}" 
+                           Width="200"
+                           Height="32"></Label>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+        <ListBox.Style>
+            <Style 
+                TargetType="ListBox"
+                BasedOn="{StaticResource {x:Type ListBox}}">
+                <Style.Triggers>
+                    <!-- Use ListBox.HasItems instead of Binding -->
+                    <Trigger Property="HasItems" Value="False">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <TextBlock  
+                                                    Margin="10 5 0 0"
+                                                    FontSize="14"
+                                                    FontWeight="ExtraLight"
+                                                    Foreground="#b9bbbe">There're no active users to have conversations with</TextBlock>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ListBox.Style>
+    </ListBox>
+</UserControl>

@@ -1,0 +1,52 @@
+﻿<Window x:Class="VoiceChat.Desktop.Windows.ConversationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VoiceChat.Desktop.Windows"
+        mc:Ignorable="d"
+        Background="#2f3136"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        xmlns:ui="clr-namespace:VoiceChat.Desktop.Controls"
+        WindowStartupLocation="CenterScreen"
+        Title="MadJuns" Height="450" Width="400">
+    <Grid>
+        <Border BorderBrush="#202225" BorderThickness="2" CornerRadius="6"/>
+        <DockPanel VerticalAlignment="Top">
+            <DockPanel x:Name="TitleBar" DockPanel.Dock="Top" Height="24" Background="#202225">
+                <ui:CloseButton DockPanel.Dock="Right"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10 5 0 0" Foreground="#fdf8f1" FontSize="10" FontWeight="DemiBold">MadJuns</TextBlock>
+            </DockPanel>
+            <DockPanel>
+                <ui:UsersList/>
+            </DockPanel>
+        </DockPanel>
+        <DockPanel VerticalAlignment="Bottom"  Height="48" Background="#292b2f">
+            <StackPanel Orientation="Horizontal">
+                <Viewbox Margin="5 0 0 0" Width="42" Height="42">
+                    <Grid Width="20" Height="20">
+                        <Ellipse Fill="#4a53b0"/>
+                        <TextBlock HorizontalAlignment="Center" Text="{Binding UserInfoViewModel.FirstLetter}" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </Viewbox>
+                <StackPanel Orientation="Vertical" Width="250">
+                    <Label HorizontalAlignment="Left"
+                           FontWeight="DemiBold" 
+                           FontSize="14" 
+                           Content="{Binding UserInfoViewModel.Nickname}" 
+                           Width="200" 
+                           Height="24"></Label>
+                    <Label HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Foreground="#b9bbbe"
+                           FontWeight="Thin" 
+                           FontSize="10"
+                           Content="{Binding UserInfoViewModel.AccountId}" 
+                           Width="200"
+                           Height="32"></Label>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

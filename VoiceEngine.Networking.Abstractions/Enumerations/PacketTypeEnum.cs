@@ -7,6 +7,6 @@
         Event = 2,
         UserList = 3,
         FinishHandshake = 4,
-        InitHandshake = 5
+        InitHandshake = 5,
     }
 }

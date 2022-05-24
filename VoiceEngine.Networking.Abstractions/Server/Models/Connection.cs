@@ -6,6 +6,7 @@
         {
             AccountId = accountId;
             Socket = socket;
+            NickName = null;
         }
 
         public string AccountId { get; private set; }

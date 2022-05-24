@@ -17,7 +17,7 @@ using VoiceEngine.Network.Abstractions.Services;
 
 namespace VoiceChat.Desktop
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow1 : Window
     {
         private IInputAudioDevice _inputAudioDevice;
         private IOutputAudioDevice _outputAudioDevice;
@@ -35,7 +35,7 @@ namespace VoiceChat.Desktop
         private short[] _pcmDecodedBuffer = new short[480];
         private string _accountId;
 
-        public MainWindow(
+        public MainWindow1(
             IInputAudioDevice inputAudioDevice,
             IOutputAudioDevice outputAudioDevice,
             ISocketClient webSocketClient,
@@ -68,7 +68,7 @@ namespace VoiceChat.Desktop
             _socketClient.OnMessage += WebSocketClient_OnMessage;
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
 
-            InitializeComponent();
+            //InitializeComponent();
         }
 
         private async void WebSocketClient_OnMessage(NetworkMessageReceivedEventArgs e)
@@ -90,10 +90,10 @@ namespace VoiceChat.Desktop
 
                     var userListPacket = PacketConvertor.ToUserListPacket(e.PacketPayload);
 
-                    foreach (var userId in userListPacket.Ids)
-                    {
-                        _outputAudioDevice.AddInput(userId);
-                    }
+                    //foreach (var userId in userListPacket.Ids)
+                    //{
+                    //    _outputAudioDevice.AddInput(userId);
+                    //}
 
                     break;
 
@@ -176,10 +176,10 @@ namespace VoiceChat.Desktop
 
             _outputAudioDevice.Start();
 
-            InputDeviceDropdown.ItemsSource = _inputAudioDevice.Options;
-            OutputDeviceDropdown.ItemsSource = _outputAudioDevice.Options;
-            InputDeviceDropdown.SelectedItem = _inputAudioDevice.SelectedOption;
-            OutputDeviceDropdown.SelectedItem = _outputAudioDevice.SelectedOption;
+            //InputDeviceDropdown.ItemsSource = _inputAudioDevice.Options;
+            //OutputDeviceDropdown.ItemsSource = _outputAudioDevice.Options;
+            //InputDeviceDropdown.SelectedItem = _inputAudioDevice.SelectedOption;
+            //OutputDeviceDropdown.SelectedItem = _outputAudioDevice.SelectedOption;
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
