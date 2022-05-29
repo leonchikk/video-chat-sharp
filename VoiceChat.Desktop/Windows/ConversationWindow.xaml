@@ -10,12 +10,14 @@
         AllowsTransparency="True"
         xmlns:ui="clr-namespace:VoiceChat.Desktop.Controls"
         WindowStartupLocation="CenterScreen"
-        Title="MadJuns" Height="450" Width="400">
+        ContentRendered="Window_ContentRendered"
+        Title="MadJuns" Height="600" Width="400">
     <Grid>
         <Border BorderBrush="#202225" BorderThickness="2" CornerRadius="6"/>
         <DockPanel VerticalAlignment="Top">
             <DockPanel x:Name="TitleBar" DockPanel.Dock="Top" Height="24" Background="#202225">
                 <ui:CloseButton DockPanel.Dock="Right"/>
+                <ui:MinimizeButton DockPanel.Dock="Right"/>
                 <TextBlock HorizontalAlignment="Left" Margin="10 5 0 0" Foreground="#fdf8f1" FontSize="10" FontWeight="DemiBold">MadJuns</TextBlock>
             </DockPanel>
             <DockPanel>
@@ -47,6 +49,18 @@
                            Height="32"></Label>
                 </StackPanel>
             </StackPanel>
+            
+            <!--<ui:IconButton Icon="Settings"
+                           IsEnabled="False"
+                            HorizontalAlignment="Right" 
+                            VerticalContentAlignment="Center" 
+                            HorizontalContentAlignment="Center"
+                            Margin="30 0 5 0"/>-->
+            <ui:MicroButton Width="32" Height="32" 
+                            HorizontalAlignment="Right" 
+                            VerticalContentAlignment="Center" 
+                            HorizontalContentAlignment="Center"
+                            Margin="0 0 5 0"/>
         </DockPanel>
     </Grid>
 </Window>

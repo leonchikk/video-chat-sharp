@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using VoiceEngine.Network.Abstractions;
+using VoiceEngine.Network.Abstractions.Enumerations;
 using VoiceEngine.Network.Abstractions.EventArgs;
-using VoiceEngine.Network.Abstractions.Models;
 using VoiceEngine.Network.Abstractions.Packets;
 using VoiceEngine.Network.Abstractions.Packets.Convertor;
 using VoiceEngine.Network.Abstractions.Packets.Events;
 using VoiceEngine.Network.Abstractions.Server;
+using VoiceEngine.Network.Abstractions.Server.Extensions;
 using VoiceEngine.Network.Abstractions.Server.Models;
 using VoiceEngine.Network.Server.SocketAdapters;
 
@@ -74,6 +74,31 @@ namespace VoiceEngine.API.Middlewares
                     _ = _broadcaster.ToAllExcept(audioPacket.SenderId, obj.RawPayload);
 
                     break;
+
+                case PacketTypeEnum.Event:
+
+                    var eventPacket = PacketConvertor.ToEventPacket(obj.PacketPayload);
+
+                    string senderId = null;
+                    Packet packet = null;
+
+                    switch (eventPacket.EventType)
+                    {
+                        case EventTypeEnum.Mute:
+                            packet = PacketConvertor.ToMutePacket(eventPacket.PacketPayload);
+                            senderId = (packet as MutePacket).AccountId;
+                            break;
+
+                        case EventTypeEnum.Unmute:
+                            packet = PacketConvertor.ToUnmutePacket(eventPacket.PacketPayload);
+                            senderId = (packet as UnmutePacket).AccountId;
+                            break;
+                    }
+
+                    _ = _broadcaster.ToAllExcept(senderId, packet);
+
+                    break;
+
                 case PacketTypeEnum.FinishHandshake:
 
                     var finishHandshakePacket = PacketConvertor.ToFinishHandshakePacket(obj.PacketPayload);
@@ -83,11 +108,7 @@ namespace VoiceEngine.API.Middlewares
 
                     _ = _broadcaster.ToUser(finishHandshakePacket.SenderId, new UsersListPacket
                                         (
-                                            _connectionManager.Get()
-                                                              .Where(x => x.AccountId != finishHandshakePacket.SenderId)
-                                                              .Where(x => x.FinishedHandshake)
-                                                              .Select(x => new UserInfoModel(x.AccountId, x.NickName))
-                                                              .ToArray()
+                                            _connectionManager.GetAllExept(finishHandshakePacket.SenderId)
                                         ));
 
                     _ = _broadcaster.ToAllExcept(finishHandshakePacket.SenderId, new UserConnectionPacket(finishHandshakePacket.SenderId, finishHandshakePacket.Nickname));

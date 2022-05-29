@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="VoiceChat.Desktop.Controls.MicroButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VoiceChat.Desktop.Controls"
+             xmlns:ui="clr-namespace:VoiceChat.Desktop.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="24" d:DesignWidth="24">
+    <Grid Name="Grid" Background="Transparent">
+        <ui:IconButton HorizontalAlignment="Right" 
+                   Icon="Microphone"
+                   x:Name="microOnBtn"
+                   ButtonCommand="{Binding UserInfoViewModel.SwitchCommand}">
+            <ui:IconButton.Style>
+                <Style TargetType="ui:IconButton">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding UserInfoViewModel.IsMicroOn}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding UserInfoViewModel.IsMicroOn}" Value="False">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ui:IconButton.Style>
+        </ui:IconButton>
+        <ui:IconButton HorizontalAlignment="Right" 
+                       Icon="MicOff"
+                       ButtonCommand="{Binding UserInfoViewModel.SwitchCommand}">
+            <ui:IconButton.Style>
+                <Style TargetType="ui:IconButton">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding UserInfoViewModel.IsMicroOn}" Value="False">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding UserInfoViewModel.IsMicroOn}" Value="True">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ui:IconButton.Style>
+        </ui:IconButton>
+        <Rectangle Name="Rect" MouseLeftButtonDown="Rect_MouseLeftButtonDown">
+            <Rectangle.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="True">
+                            <Setter Property="Rectangle.Fill" Value="#918e85" />
+                            <Setter Property="Rectangle.Opacity" Value="0.5" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Rectangle.Style>
+        </Rectangle>
+    </Grid>
+</UserControl>

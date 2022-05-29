@@ -5,6 +5,8 @@ using VoiceEngine.Network.DependencyInjection;
 using VoiceEngine.Filters.DependencyInjection;
 using VoiceChat.Desktop.Windows;
 using VoiceChat.Desktop.ViewModels;
+using VoiceEngine.Abstractions.Services;
+using VoiceChat.Desktop.Services;
 
 namespace VoiceChat.Desktop
 {
@@ -24,6 +26,7 @@ namespace VoiceChat.Desktop
             services.AddSingleton<ConversationWindow>();
             services.AddSingleton<SplashWindow>();
             services.AddSingleton<SignInWindow>();
+            services.AddSingleton<IAppMediaPlayer, AppMediaPlayer>();
             services.AddClientInfrastructure();
             services.AddInputOutputInfrastructure();
             services.AddOpusCodec();

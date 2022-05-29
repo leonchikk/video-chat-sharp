@@ -12,7 +12,7 @@
         Background="#353940"
         Unloaded="Window_Unloaded"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="SplashScreen" Height="280" Width="320">
+        Title="SplashScreen" Height="280" Width="400">
     <Grid>
         <Label Content="Welcome back!" Foreground="#cecfd1" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Top"/>
         <Label Content="We're so exited to see you again!" Foreground="#b9bbbe" FontSize="16" HorizontalAlignment="Center" Margin="0,66,0,0" VerticalAlignment="Top"/>

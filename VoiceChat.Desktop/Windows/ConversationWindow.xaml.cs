@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using MaterialDesignThemes.Wpf;
+using System.Windows;
 using VoiceChat.Desktop.ViewModels;
 
 namespace VoiceChat.Desktop.Windows
@@ -17,6 +18,11 @@ namespace VoiceChat.Desktop.Windows
             _conversationViewModel = conversationViewModel;
 
             DataContext = _conversationViewModel;
+        }
+
+        private void Window_ContentRendered(object sender, System.EventArgs e)
+        {
+            _conversationViewModel.IsLoaded = true;
         }
     }
 }

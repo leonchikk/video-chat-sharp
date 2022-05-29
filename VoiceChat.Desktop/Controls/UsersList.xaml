@@ -4,26 +4,31 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VoiceChat.Desktop.Controls"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <ListBox ItemsSource="{Binding ConnectionsList}">
+             x:Name="usersList"
+             d:DesignHeight="450" d:DesignWidth="400">
+    <ListBox ItemsSource="{Binding ConnectionsList}" HorizontalContentAlignment="Stretch">
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <DockPanel Margin="2">
-                    <StackPanel Orientation="Horizontal">
+                <Grid Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" >
                         <Viewbox Margin="5 0 0 0" Width="42" Height="42">
                             <Grid Width="20" Height="20">
                                 <Ellipse Fill="#4a53b0"/>
                                 <TextBlock HorizontalAlignment="Center" Text="{Binding FirstLetter}" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                         </Viewbox>
-                        <StackPanel Orientation="Vertical" Width="250">
+                        <StackPanel Orientation="Vertical">
                             <Label HorizontalAlignment="Left"
                            FontWeight="DemiBold" 
                            FontSize="14" 
                            Content="{Binding Nickname}" 
                            Width="200" 
-                           Height="24"></Label>
+                           Height="26"></Label>
                             <Label HorizontalAlignment="Left"
                            VerticalAlignment="Top"
                            Foreground="#b9bbbe"
@@ -34,7 +39,39 @@
                            Height="32"></Label>
                         </StackPanel>
                     </StackPanel>
-                </DockPanel>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Grid>
+                            <materialDesign:PackIcon Kind="Microphone" Height="20" Width="20" Foreground="#b9bbbe"/>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMuted}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                        </Grid>
+                        <Grid>
+                            <materialDesign:PackIcon Kind="MicOff" Height="20" Width="20" Foreground="#b9bbbe"/>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMuted}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
             </DataTemplate>
         </ListBox.ItemTemplate>
         <ListBox.Style>
@@ -42,7 +79,6 @@
                 TargetType="ListBox"
                 BasedOn="{StaticResource {x:Type ListBox}}">
                 <Style.Triggers>
-                    <!-- Use ListBox.HasItems instead of Binding -->
                     <Trigger Property="HasItems" Value="False">
                         <Setter Property="Template">
                             <Setter.Value>

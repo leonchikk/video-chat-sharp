@@ -9,9 +9,9 @@
              x:Name="iconButton"
              d:DesignHeight="24" d:DesignWidth="24">
     <Grid>
-        <Button
-                x:Name="CloseButton"
-                HorizontalAlignment="Left" 
+        <Button x:Name="button"
+                HorizontalAlignment="Left"  
+                Command="{Binding ButtonCommand, ElementName=iconButton}"
                 VerticalAlignment="Top" Height="24" Width="24">
             <Button.Template>
                 <ControlTemplate>

@@ -3,36 +3,39 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Media;
-using System.Windows.Threading;
 using VoiceChat.Desktop.Stores;
 using VoiceEngine.Abstractions.Encoding;
+using VoiceEngine.Abstractions.Enumerations;
 using VoiceEngine.Abstractions.EventArgs;
 using VoiceEngine.Abstractions.Filters;
 using VoiceEngine.Abstractions.IO;
+using VoiceEngine.Abstractions.Services;
 using VoiceEngine.Network.Abstractions;
 using VoiceEngine.Network.Abstractions.Clients;
 using VoiceEngine.Network.Abstractions.Enumerations;
 using VoiceEngine.Network.Abstractions.EventArgs;
 using VoiceEngine.Network.Abstractions.Packets;
 using VoiceEngine.Network.Abstractions.Packets.Convertor;
+using VoiceEngine.Network.Abstractions.Packets.Events;
 
 namespace VoiceChat.Desktop.ViewModels
 {
     public class ConversationViewModel : ViewModelBase
     {
+        public bool IsLoaded { get; set; }
+
         private readonly ISocketClient _socketClient;
         private readonly IInputAudioDevice _inputAudioDevice;
         private readonly IOutputAudioDevice _outputAudioDevice;
         private readonly INoiseReducer _noiseReducer;
         private readonly IAudioEncoder _encoder;
         private readonly IAudioDecoder _decoder;
+        private readonly IAppMediaPlayer _appMediaPlayer;
 
         private readonly Preprocessor _preprocessor;
 
         private readonly byte[] _encodedBuffer = new byte[1024];
         private short[] _pcmDecodedBuffer = new short[480];
-
 
         private ObservableCollection<ConnectionViewModel> _connectionsList;
         public ObservableCollection<ConnectionViewModel> ConnectionsList
@@ -62,7 +65,8 @@ namespace VoiceChat.Desktop.ViewModels
             ISocketClient socketClient,
             INoiseReducer noiseReducer,
             IAudioEncoder encoder,
-            IAudioDecoder audioDecoder)
+            IAudioDecoder audioDecoder,
+            IAppMediaPlayer appMediaPlayer)
         {
             _inputAudioDevice = inputAudioDevice;
             _outputAudioDevice = outputAudioDevice;
@@ -70,6 +74,7 @@ namespace VoiceChat.Desktop.ViewModels
             _encoder = encoder;
             _noiseReducer = noiseReducer;
             _decoder = audioDecoder;
+            _appMediaPlayer = appMediaPlayer;
 
             _preprocessor = new Preprocessor(480, 48000)
             {
@@ -86,6 +91,8 @@ namespace VoiceChat.Desktop.ViewModels
 
             _inputAudioDevice.OnSamplesRecorded += InputAudioDevice_OnSampleRecorded;
             _socketClient.OnMessage += OnMessage;
+
+            IsLoaded = false;
         }
 
         private void OnMessage(NetworkMessageReceivedEventArgs e)
@@ -107,42 +114,33 @@ namespace VoiceChat.Desktop.ViewModels
 
                     var userListPacket = PacketConvertor.ToUserListPacket(e.PacketPayload);
 
-                    UserInfoViewModel = new UserInfoViewModel()
+                    UserInfoViewModel = new UserInfoViewModel(_appMediaPlayer, _inputAudioDevice)
                     {
                         AccountId = UserStore.AccountId,
-                        Nickname = UserStore.Nickname
+                        Nickname = UserStore.Nickname,
+                        IsMicroOn = true
                     };
 
-                    //TODO: Move this out of view model (Into separate service and just inject interface here)
-                    var uri = new Uri(@"Resources/Sounds/joined.mp3", UriKind.RelativeOrAbsolute);
-                    var player = new MediaPlayer();
+                    UserInfoViewModel.PropertyChanged += UserInfoViewModel_PropertyChanged;
 
-                    player.Open(uri);
-                    player.Play();
-                    //////////////////////////
-                    ////(Another (crutch)
-                    _inputAudioDevice.Start();
-                    _outputAudioDevice.Start();
-                    ////
-
-                    foreach (var user in userListPacket.Users)
+                    App.Current.Dispatcher.Invoke(() =>
                     {
-
-                        App.Current.Dispatcher.Invoke(() =>
+                        foreach (var user in userListPacket.Users)
                         {
-                            ConnectionsList.Add(new ConnectionViewModel()
-                            {
-                                AccountId = user.AccountId,
-                                Nickname = user.Nickname
-                            });
-                        });
+                            ConnectionsList.Add(new ConnectionViewModel(user.AccountId, user.Nickname));
 
-                        _outputAudioDevice.AddInput(user.AccountId);
-                    }
+                            _outputAudioDevice.AddInput(user.AccountId);
+                        }
+                    });
+
+                    _outputAudioDevice.Start();
 
                     break;
 
                 case PacketTypeEnum.Event:
+
+                    if (!IsLoaded)
+                        return;
 
                     var eventPacket = PacketConvertor.ToEventPacket(e.PacketPayload);
 
@@ -154,48 +152,50 @@ namespace VoiceChat.Desktop.ViewModels
 
                             _outputAudioDevice.AddInput(connectionPacket.AccountId);
 
-                            //TODO: Move to extensions
                             App.Current.Dispatcher.Invoke(() =>
                             {
-                                ConnectionsList.Add(new ConnectionViewModel()
-                                {
-                                    AccountId = connectionPacket.AccountId,
-                                    Nickname = connectionPacket.Nickname
-                                });
+                                ConnectionsList.Add(new ConnectionViewModel(connectionPacket.AccountId, connectionPacket.Nickname));
                             });
 
-                            //TODO: Move this out of view model (Into separate service and just inject interface here)
-                            uri = new Uri(@"Resources/Sounds/joined.mp3", UriKind.RelativeOrAbsolute);
-                            player = new MediaPlayer();
+                            _appMediaPlayer.Play(AppSoundEnum.Joined);
 
-                            player.Open(uri);
-                            player.Play();
-                            ///////////////////////////
-                            ///
                             break;
 
                         case EventTypeEnum.UserDisconnect:
 
                             var disconnectionPacket = PacketConvertor.ToUserDisconnectPacket(eventPacket.PacketPayload);
 
-                            //TODO: Move to extensions
                             App.Current.Dispatcher.Invoke(() =>
                             {
                                 var toRemove = ConnectionsList.FirstOrDefault(x => x.AccountId == disconnectionPacket.AccountId);
                                 ConnectionsList.Remove(toRemove);
                             });
 
-                            //TODO: Move this out of view model (Into separate service and just inject interface here)
-                            uri = new Uri(@"Resources/Sounds/left.mp3", UriKind.RelativeOrAbsolute);
-                            player = new MediaPlayer();
-
-                            player.Open(uri);
-                            player.Play();
-                            //////////////////////
-
+                            _appMediaPlayer.Play(AppSoundEnum.Left);
                             _outputAudioDevice.RemoveInput(disconnectionPacket.AccountId);
 
                             break;
+
+                        case EventTypeEnum.Mute:
+
+                            var mutePacket = PacketConvertor.ToMutePacket(eventPacket.PacketPayload);
+                            var user = ConnectionsList.FirstOrDefault(x => x.AccountId == mutePacket.AccountId);
+                            user.IsMuted = true;
+
+                            _appMediaPlayer.Play(AppSoundEnum.Muted);
+
+                            break;
+
+                        case EventTypeEnum.Unmute:
+
+                            var unmutePacket = PacketConvertor.ToUnmutePacket(eventPacket.PacketPayload);
+                            user = ConnectionsList.FirstOrDefault(x => x.AccountId == unmutePacket.AccountId);
+                            user.IsMuted = false;
+
+                            _appMediaPlayer.Play(AppSoundEnum.Unmuted);
+
+                            break;
+
                         default:
                             break;
                     }
@@ -205,6 +205,14 @@ namespace VoiceChat.Desktop.ViewModels
                 default:
                     break;
             }
+        }
+
+        private async void UserInfoViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (UserInfoViewModel.IsMicroOn)
+                await _socketClient.SendPacket(new UnmutePacket(UserStore.AccountId));
+            else
+                await _socketClient.SendPacket(new MutePacket(UserStore.AccountId));
         }
 
         private async void InputAudioDevice_OnSampleRecorded(AudioSampleRecordedEventArgs e)
